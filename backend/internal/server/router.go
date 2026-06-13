@@ -52,6 +52,18 @@ func (s *Server) routes() http.Handler {
 			r.With(s.requireAuth).Get("/me", s.handleMe)
 		})
 
+		// Zeiterfassung — Arbeiter (Phase 4): requireAuth, Queries auf identity.ArbeiterID gescoped.
+		r.Group(func(r chi.Router) {
+			r.Use(s.requireAuth)
+			r.Route("/zeit", func(r chi.Router) {
+				r.Post("/start", s.handleStartZeit)
+				r.Post("/stop", s.handleStopZeit)
+				r.Get("/laufend", s.handleGetLaufend) // statisch VOR /{id}
+				r.Get("/", s.handleListOwnZeit)
+				r.Patch("/{id}", s.handlePatchZeit)
+			})
+		})
+
 		// Admin-Stammdaten (Phase 3): alles hinter requireAuth + requireAdmin.
 		r.Group(func(r chi.Router) {
 			r.Use(s.requireAuth, s.requireAdmin)
@@ -71,6 +83,9 @@ func (s *Server) routes() http.Handler {
 				r.Patch("/{id}", s.handlePatchBaustelle)
 				r.Delete("/{id}", s.handleDeactivateBaustelle)
 			})
+
+			// Zeiterfassung — Admin (Phase 4): alle Buchungen, Filter + Summen.
+			r.Get("/admin/zeit", s.handleAdminListZeit)
 		})
 	})
 

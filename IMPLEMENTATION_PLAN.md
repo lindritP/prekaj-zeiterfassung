@@ -88,14 +88,14 @@
 
 **Ziel:** Start/Stopp und Übersicht der Arbeitszeiten — funktioniert robust.
 
-- [ ] Migration `zeitbuchung`: `id`, `arbeiter_id` (FK), `baustelle_id` (FK, nullable), `start_zeit`, `end_zeit` (nullable), `pause_minuten` (default 0), `notiz`, `created_at`, `updated_at`. Zeiten in **UTC**.
-- [ ] DB-Constraint/Logik: **max. eine laufende** Buchung pro Arbeiter (`end_zeit IS NULL`) — Partial Unique Index.
-- [ ] sqlc-Queries: start (insert), stop (update end_zeit), laufende holen, eigene listen (Zeitraum), admin-weite Liste (Filter: Arbeiter, Zeitraum, Baustelle).
-- [ ] Endpunkte **Arbeiter:** `POST /api/v1/zeit/start`, `POST /zeit/stop`, `GET /zeit` (eigene, Zeitraum-Filter), `PATCH /zeit/{id}` (korrigieren), `GET /zeit/laufend`.
-- [ ] Endpunkt **Admin:** `GET /api/v1/admin/zeit` (alle, Filter + Summen).
-- [ ] Dauer-Berechnung (`end − start − pause`); Edge Cases: Stop ohne Start (409), Buchung über Mitternacht, negative Dauer verhindern.
+- [x] Migration `zeitbuchung` (`000004`): `id` (uuid v7), `arbeiter_id` (FK CASCADE), `baustelle_id` (FK SET NULL, nullable), `start_zeit`, `end_zeit` (nullable=läuft), `pause_minuten` (default 0, CHECK ≥0), `notiz`, timestamps. **UTC**. CHECK `end > start`.
+- [x] **Partial Unique Index** `(arbeiter_id) WHERE end_zeit IS NULL` → max. eine laufende Buchung (Start #2 → 409).
+- [x] sqlc-Queries: start/stop/laufend/get(own)/list(own, Zeitraum)/update(own); admin-Liste + Summen (gesamt + pro Arbeiter, in SQL). Dauer pro Zeile in Go.
+- [x] Endpunkte **Arbeiter:** `POST /api/v1/zeit/start`, `/zeit/stop`, `GET /zeit` (Zeitraum), `PATCH /zeit/{id}`, `GET /zeit/laufend` — `requireAuth`, auf `identity.ArbeiterID` gescoped.
+- [x] Endpunkt **Admin:** `GET /api/v1/admin/zeit` (Filter Arbeiter/Baustelle/Zeitraum + Summen).
+- [x] Dauer = `end − start − pause`. **Pause = AUTO statutarisch (AZG §11: >6h → 30 min)**, override per PATCH. Edge Cases: Stop ohne Start → 409, über Mitternacht (UTC = unkritisch), negative Dauer verhindert (CHECK + `validateSpan`), Backdating erlaubt (Zukunft → 400), unbekannte Baustelle → 400.
 
-**DoD:** Arbeiter startet/stoppt Zeiten; nur eine läuft gleichzeitig; eigene & (Admin) alle Zeiten mit korrekter Dauer abrufbar.
+**DoD:** ✅ Arbeiter startet/stoppt; nur eine läuft (409); eigene & Admin-Liste mit korrekter Dauer (inkl. auto-30min über 7h-Span) + Summen; Worker-Isolation (0/404). `make check` clean.
 
 ---
 

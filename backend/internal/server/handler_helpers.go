@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -56,4 +57,51 @@ func defaultNumeric(s string) string {
 		return "0"
 	}
 	return s
+}
+
+// isForeignKeyViolation reports a Postgres foreign_key_violation (23503), e.g. an
+// unknown baustelle_id referenced by a zeitbuchung.
+func isForeignKeyViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23503"
+}
+
+// parseZeitraum reads optional ?von= & ?bis= RFC3339 timestamps. Absent => nil.
+func parseZeitraum(w http.ResponseWriter, r *http.Request) (von, bis *time.Time, ok bool) {
+	parse := func(name string) (*time.Time, bool) {
+		raw := r.URL.Query().Get(name)
+		if raw == "" {
+			return nil, true
+		}
+		t, err := time.Parse(time.RFC3339, raw)
+		if err != nil {
+			platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiger "+name+"-Zeitpunkt (RFC3339).")
+			return nil, false
+		}
+		u := t.UTC()
+		return &u, true
+	}
+	von, ok = parse("von")
+	if !ok {
+		return nil, nil, false
+	}
+	bis, ok = parse("bis")
+	if !ok {
+		return nil, nil, false
+	}
+	return von, bis, true
+}
+
+// parseOptionalUUIDQuery reads an optional ?name= UUID query param. Absent => nil.
+func parseOptionalUUIDQuery(w http.ResponseWriter, r *http.Request, name string) (*uuid.UUID, bool) {
+	raw := r.URL.Query().Get(name)
+	if raw == "" {
+		return nil, true
+	}
+	id, err := uuid.Parse(raw)
+	if err != nil {
+		platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültige "+name+"-ID.")
+		return nil, false
+	}
+	return &id, true
 }

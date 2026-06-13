@@ -40,3 +40,15 @@ type RefreshToken struct {
 	RevokedAt  *time.Time `json:"revoked_at"`
 	CreatedAt  time.Time  `json:"created_at"`
 }
+
+type Zeitbuchung struct {
+	ID           uuid.UUID  `json:"id"`
+	ArbeiterID   uuid.UUID  `json:"arbeiter_id"`
+	BaustelleID  *uuid.UUID `json:"baustelle_id"`
+	StartZeit    time.Time  `json:"start_zeit"`
+	EndZeit      *time.Time `json:"end_zeit"`
+	PauseMinuten int32      `json:"pause_minuten"`
+	Notiz        string     `json:"notiz"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
+}
