@@ -62,6 +62,13 @@ func (s *Server) routes() http.Handler {
 				r.Get("/", s.handleListOwnZeit)
 				r.Patch("/{id}", s.handlePatchZeit)
 			})
+
+			// Urlaubsanträge — Arbeiter (Phase 5).
+			r.Route("/urlaub", func(r chi.Router) {
+				r.Post("/", s.handleCreateUrlaub)
+				r.Get("/", s.handleListOwnUrlaub)
+				r.Delete("/{id}", s.handleDeleteUrlaub)
+			})
 		})
 
 		// Admin-Stammdaten (Phase 3): alles hinter requireAuth + requireAdmin.
@@ -86,6 +93,12 @@ func (s *Server) routes() http.Handler {
 
 			// Zeiterfassung — Admin (Phase 4): alle Buchungen, Filter + Summen.
 			r.Get("/admin/zeit", s.handleAdminListZeit)
+
+			// Urlaubsanträge — Admin (Phase 5): Liste (Filter) + Entscheidung.
+			r.Route("/admin/urlaub", func(r chi.Router) {
+				r.Get("/", s.handleAdminListUrlaub)
+				r.Patch("/{id}", s.handleDecideUrlaub)
+			})
 		})
 	})
 

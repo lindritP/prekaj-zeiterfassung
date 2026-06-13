@@ -103,13 +103,13 @@
 
 **Ziel:** Arbeiter stellt Anträge, Admin entscheidet.
 
-- [ ] Migration `urlaubsantrag`: `id`, `arbeiter_id`, `von_datum`, `bis_datum`, `typ`, `status` (`offen`|`genehmigt`|`abgelehnt`), `grund`, `entschieden_von`, `entschieden_am`, `created_at`.
-- [ ] sqlc-Queries: create, eigene listen, alle listen (Admin, Filter Status/Zeitraum), Status setzen.
-- [ ] Endpunkte **Arbeiter:** `POST /api/v1/urlaub`, `GET /urlaub` (eigene), `DELETE /urlaub/{id}` (nur solange `offen`).
-- [ ] Endpunkte **Admin:** `GET /api/v1/admin/urlaub`, `PATCH /admin/urlaub/{id}` (genehmigen/ablehnen, setzt `entschieden_von/am`).
-- [ ] Validierung: `von_datum ≤ bis_datum`; Status-Übergänge nur erlaubt vom Status `offen`.
+- [x] Migration `urlaubsantrag` (`000005`): `id` (uuid v7), `arbeiter_id` (FK CASCADE), `von_datum`/`bis_datum` (date), `typ` (CHECK `urlaub`|`krankheit`|`sonstige`), `status` (CHECK `offen`|`genehmigt`|`abgelehnt`, default `offen`), `grund`, `entschieden_von` (FK), `entschieden_am`, `created_at`. CHECK `bis ≥ von`.
+- [x] sqlc-Queries: create, eigene listen, get(own/admin), delete(own), admin-Liste (Filter Status/Zeitraum), decide (atomar `WHERE status='offen'`). sqlc `date`→`time.Time`-Override.
+- [x] Endpunkte **Arbeiter:** `POST /api/v1/urlaub`, `GET /urlaub` (eigene), `DELETE /urlaub/{id}` (nur `offen` → sonst 409). `requireAuth`, gescoped.
+- [x] Endpunkte **Admin:** `GET /api/v1/admin/urlaub` (Filter), `PATCH /admin/urlaub/{id}` (genehmigen/ablehnen → setzt `entschieden_von`=Admin + `entschieden_am`).
+- [x] Validierung: `von_datum ≤ bis_datum` (app + DB-CHECK); Status-Übergänge nur aus `offen` (Re-Entscheidung → 409). Daten als `JJJJ-MM-TT` (validator `datetime`).
 
-**DoD:** Antrag → Status `offen`; Admin genehmigt/lehnt ab; Arbeiter sieht Status seiner Anträge.
+**DoD:** ✅ Antrag → `offen`; Admin genehmigt/lehnt ab (wer/wann erfasst); Arbeiter sieht Status. Verifiziert: 201/200, Filter, 409 (Löschen non-offen / Re-Entscheidung), 400 (von>bis/typ/datum/status), 404 (Isolation), 403 (Arbeiter→Admin-Route). `make check` clean. *(§13 offen: Resturlaub-Konto, halbe Tage, Überlappung.)*
 
 ---
 

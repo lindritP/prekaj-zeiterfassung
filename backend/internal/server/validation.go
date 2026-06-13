@@ -56,6 +56,8 @@ func fieldRule(field, tag, param string) string {
 		return field + " muss numerisch sein"
 	case "oneof":
 		return field + " muss einer von [" + param + "] sein"
+	case "datetime":
+		return field + " muss ein gültiges Datum (JJJJ-MM-TT) sein"
 	default:
 		return field + " ist ungültig (" + tag + ")"
 	}

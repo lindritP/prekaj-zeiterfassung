@@ -38,3 +38,11 @@ sql:
             go_type:
               type: "time.Time"
               pointer: true
+          # date -> time.Time (nullable -> *time.Time) instead of pgtype.Date.
+          - db_type: "date"
+            go_type: "time.Time"
+          - db_type: "date"
+            nullable: true
+            go_type:
+              type: "time.Time"
+              pointer: true

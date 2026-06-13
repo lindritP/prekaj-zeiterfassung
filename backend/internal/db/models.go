@@ -41,6 +41,19 @@ type RefreshToken struct {
 	CreatedAt  time.Time  `json:"created_at"`
 }
 
+type Urlaubsantrag struct {
+	ID             uuid.UUID  `json:"id"`
+	ArbeiterID     uuid.UUID  `json:"arbeiter_id"`
+	VonDatum       time.Time  `json:"von_datum"`
+	BisDatum       time.Time  `json:"bis_datum"`
+	Typ            string     `json:"typ"`
+	Status         string     `json:"status"`
+	Grund          string     `json:"grund"`
+	EntschiedenVon *uuid.UUID `json:"entschieden_von"`
+	EntschiedenAm  *time.Time `json:"entschieden_am"`
+	CreatedAt      time.Time  `json:"created_at"`
+}
+
 type Zeitbuchung struct {
 	ID           uuid.UUID  `json:"id"`
 	ArbeiterID   uuid.UUID  `json:"arbeiter_id"`
