@@ -2,3 +2,5 @@ packages:
   - "web"
   - "mobile"
   - "packages/*"
+minimumReleaseAgeExclude:
+  - react-hook-form@7.79.0

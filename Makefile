@@ -93,8 +93,8 @@ seed: ## Initial-Admin anlegen/aktualisieren (Phase 2) — liest SEED_ADMIN_* au
 	else echo "[TODO Phase 2] cmd/seed/main.go fehlt"; fi
 
 .PHONY: run-web
-run-web: ## Web Dev-Server starten (Phase 8)
-	@echo "[TODO Phase 8] pnpm --filter @prekaj/web dev"
+run-web: ## Web Dev-Server starten (Vite :5173, proxyt /api -> :8080)
+	pnpm --filter @prekaj/web dev
 
 .PHONY: run-mobile
 run-mobile: ## Expo Dev-Server starten (Phase 9)

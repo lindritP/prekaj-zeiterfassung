@@ -144,12 +144,12 @@
 
 ## Phase 8 — Web-Frontend (Admin-Oberfläche)
 
-**Ziel:** vollständige Admin-Web-App gegen die API.
+**Ziel:** vollständige Admin-Web-App gegen die API. *(In zwei Teilen: **Part 1 ✅** = Scaffold + Auth, **Part 2** = Screens.)*
 
-- [ ] Vite + React + TS + Tailwind scaffolden; ESLint/Prettier; (optional) `shadcn/ui`.
-- [ ] API-Client (Fetch-Wrapper) + **TanStack Query**; Auth-Interceptor (401 → refresh → retry).
-- [ ] Auth-Context + **Login-Seite** + geschützte Routen (Guard); Logout.
-- [ ] **Dashboard** (Kennzahlen-Überblick).
+- [x] Vite 8 + React 19 + TS 6 + Tailwind v4 + **shadcn/ui** (Radix) scaffolden; ESLint/Prettier. *(Part 1)*
+- [x] API-Client (Fetch-Wrapper, `{error:{code,message}}`) + **TanStack Query**; Auth-Interceptor (401 → single-flight Refresh → Retry); Vite-Proxy `/api → :8080`. *(Part 1)*
+- [x] Auth-Context (Token nur im Speicher, Cookie-Refresh) + **Login-Seite** (RHF+zod) + geschützte Routen (Guard); Logout. *(Part 1)*
+- [ ] **Dashboard** (Kennzahlen-Überblick). *(Part 1: Platzhalter-Shell; Kennzahlen in Part 2)*
 - [ ] **Arbeitszeiten (alle):** Tabelle + Filter (Arbeiter, Zeitraum, Baustelle) + Summen.
 - [ ] **Arbeiter-Verwaltung:** Liste + Anlegen/Bearbeiten/Deaktivieren (RHF + zod).
 - [ ] **Baustellen-Verwaltung:** Liste + CRUD.
