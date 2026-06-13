@@ -15,7 +15,7 @@
 
 **Ziel:** Monorepo steht, alle Tools laufen lokal auf dem Mac (M3).
 
-- [x] Git-Repo lokal initialisiert (Branch `main`, erster Commit). **Public GitHub-Remote bewusst zurückgestellt** (vom Auftraggeber später anzulegen/pushen).
+- [x] Git-Repo (Branch `main`) + **public GitHub-Remote** `lindritP/prekaj-zeiterfassung` (HTTPS-Push via gh-Token). Commits als `Lindrit14 <lindrit@prekaj.at>`.
 - [x] Monorepo-Ordnerstruktur gemäß `CLAUDE.md` §4 anlegen (`backend/`, `web/`, `mobile/`, `packages/shared/`, `infra/`, `.github/`).
 - [x] `.gitignore` (Go, Node, Expo `ios/`+`android/`, `.env*`, Build-Artefakte, `*.tfstate`).
 - [x] `.editorconfig` + `.nvmrc` (Node `22` — Expo SDK 56 unterstützt Node 26 noch nicht).
