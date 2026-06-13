@@ -15,6 +15,7 @@ import (
 	"github.com/lindritP/prekaj-zeiterfassung/backend/internal/auth"
 	"github.com/lindritP/prekaj-zeiterfassung/backend/internal/config"
 	"github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+	"github.com/lindritP/prekaj-zeiterfassung/backend/internal/storage"
 )
 
 // Server holds shared dependencies for HTTP handlers.
@@ -26,6 +27,7 @@ type Server struct {
 	hasher    auth.Hasher
 	issuer    *auth.TokenIssuer
 	validate  *validator.Validate
+	store     storage.Storage
 	dummyHash string // bcrypt hash for timing-safe login (anti-enumeration)
 }
 
@@ -59,6 +61,11 @@ func New(cfg config.Config, log *slog.Logger, pool *pgxpool.Pool) (http.Handler,
 		return name
 	})
 
+	store, err := storage.NewLocal(cfg.DokumenteDir)
+	if err != nil {
+		return nil, err
+	}
+
 	s := &Server{
 		cfg:       cfg,
 		log:       log,
@@ -67,6 +74,7 @@ func New(cfg config.Config, log *slog.Logger, pool *pgxpool.Pool) (http.Handler,
 		hasher:    hasher,
 		issuer:    issuer,
 		validate:  v,
+		store:     store,
 		dummyHash: dummyHash,
 	}
 	return s.routes(), nil

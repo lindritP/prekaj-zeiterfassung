@@ -21,6 +21,10 @@ type Config struct {
 	BcryptCost      int           `env:"BCRYPT_COST" envDefault:"12"`
 	CORSOrigins     []string      `env:"CORS_ORIGINS" envSeparator:","`
 
+	// Dokumente / Storage (Phase 7).
+	DokumenteDir string `env:"DOKUMENTE_DIR" envDefault:"storage"`
+	MaxUploadMB  int    `env:"MAX_UPLOAD_MB" envDefault:"10"`
+
 	// Seed-Admin (nur von cmd/seed genutzt; im API-Prozess leer/ungenutzt).
 	SeedAdminEmail    string `env:"SEED_ADMIN_EMAIL"`
 	SeedAdminPassword string `env:"SEED_ADMIN_PASSWORD"`

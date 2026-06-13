@@ -32,6 +32,19 @@ type Baustelle struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type Dokument struct {
+	ID         uuid.UUID `json:"id"`
+	ArbeiterID uuid.UUID `json:"arbeiter_id"`
+	Typ        string    `json:"typ"`
+	Jahr       int32     `json:"jahr"`
+	Monat      int32     `json:"monat"`
+	Dateiname  string    `json:"dateiname"`
+	StorageKey string    `json:"storage_key"`
+	MimeType   string    `json:"mime_type"`
+	Groesse    int64     `json:"groesse"`
+	CreatedAt  time.Time `json:"created_at"`
+}
+
 type RefreshToken struct {
 	ID         uuid.UUID  `json:"id"`
 	ArbeiterID uuid.UUID  `json:"arbeiter_id"`

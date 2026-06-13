@@ -10,6 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	// Embed the IANA tz database so time.LoadLocation("Europe/Vienna") works even
+	// in a distroless container (no system tzdata).
+	_ "time/tzdata"
+
 	"github.com/lindritP/prekaj-zeiterfassung/backend/internal/config"
 	"github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
 	"github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"

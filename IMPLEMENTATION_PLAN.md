@@ -131,14 +131,14 @@
 
 **Ziel:** Monatsbericht (Admin) generieren, Lohnzettel-Download (Arbeiter).
 
-- [ ] `maroto` v2 in `internal/pdf` einrichten (Layout-Helfer).
-- [ ] **Monatsbericht (Admin):** `GET /api/v1/admin/berichte/monat?arbeiter=&jahr=&monat=` → PDF (Zeiten, Summe, Überstunden, Baustellen).
-- [ ] Migration `dokument`: `id`, `arbeiter_id`, `typ` (`lohnzettel`|…), `jahr`, `monat`, `pfad`/`blob_ref`, `created_at`.
-- [ ] **Lohnzettel (Default: Upload durch Admin):** `POST /api/v1/admin/dokumente` (Upload), `GET /api/v1/dokumente` (Arbeiter: eigene), `GET /dokumente/{id}/download`.
-- [ ] Datei-Storage: lokal Volume/Verzeichnis (Dev) — in Phase 12 auf **Azure Blob Storage** umstellen.
-- [ ] Zugriffsschutz: Arbeiter sieht/lädt **nur eigene** Dokumente.
+- [x] `maroto` v2 (v2.4.0) in `internal/pdf` (Monatsbericht-Layout, A4, Tabelle + Summen).
+- [x] **Monatsbericht (Admin):** `GET /api/v1/admin/berichte/monat?arbeiter=&jahr=&monat=` → PDF (Zeiten je Baustelle, Ist/Soll/Saldo, Urlaub/Krank). Anzeige in Europe/Vienna (eingebettetes `time/tzdata`).
+- [x] Migration `dokument` (`000006`): `id`, `arbeiter_id` (FK CASCADE), `typ` (`lohnzettel`|`sonstige`), `jahr`, `monat`, `dateiname`, `storage_key`, `mime_type`, `groesse`, `created_at`.
+- [x] **Lohnzettel (Upload durch Admin):** `POST /api/v1/admin/dokumente` (multipart, PDF-only, `MAX_UPLOAD_MB`), `GET /api/v1/dokumente` (eigene), `GET /admin/dokumente` (alle), `GET /dokumente/{id}/download`.
+- [x] Datei-Storage: `internal/storage` (Interface `Storage` + `LocalStorage`, `DOKUMENTE_DIR`) — Phase 12 → Azure Blob hinter demselben Interface.
+- [x] Zugriffsschutz: Arbeiter sieht/lädt **nur eigene** Dokumente (Fremdzugriff → 404); Admin alle.
 
-**DoD:** Admin erzeugt Monatsbericht-PDF; Arbeiter lädt eigenen Lohnzettel; Fremdzugriff blockiert.
+**DoD:** ✅ Admin erzeugt Monatsbericht-PDF (gültiges %PDF, 4382 B); Admin lädt Lohnzettel hoch; Arbeiter lädt eigenen herunter (Byte-identisch). Verifiziert: B→A 404, Admin→A 200, Arbeiter-Upload 403, Nicht-PDF/monat=13/fehlt-arbeiter 400. `make check` clean.
 
 ---
 
