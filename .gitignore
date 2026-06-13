@@ -1,0 +1,61 @@
+# ── OS / Editor ───────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# ── Secrets / Env ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Node / pnpm ───────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+pnpm-debug.log*
+npm-debug.log*
+.cache/
+
+# ── Web (Vite) ────────────────────────────────────────────────
+web/dist/
+web/.vite/
+
+# ── Expo / React Native (generated native projects) ──────────
+mobile/ios/
+mobile/android/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# ── Go ────────────────────────────────────────────────────────
+backend/bin/
+backend/tmp/
+*.test
+*.out
+coverage.out
+vendor/
+
+# ── Build / Binaries ──────────────────────────────────────────
+build/
+bin/
+dist/
+
+# ── Docker ────────────────────────────────────────────────────
+*.local.yml
+
+# ── Terraform / IaC state (defensive; wir nutzen Bicep) ──────
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# ── PDF / generated artifacts (local dev) ────────────────────
+backend/storage/
+*.local.pdf

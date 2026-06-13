@@ -1,0 +1,17 @@
+{
+  "name": "prekaj-zeiterfassung",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Digitale Zeiterfassung & Urlaubsverwaltung (FliesenPrekaj GmbH) — Monorepo.",
+  "packageManager": "pnpm@11.6.0",
+  "engines": {
+    "node": ">=20.19.4",
+    "pnpm": ">=11"
+  },
+  "scripts": {
+    "web": "pnpm --filter @prekaj/web",
+    "mobile": "pnpm --filter @prekaj/mobile",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "lint": "pnpm -r --if-present run lint"
+  }
+}
