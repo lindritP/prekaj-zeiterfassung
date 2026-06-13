@@ -47,12 +47,16 @@ tools: ## Dev-CLIs installieren (pnpm, golangci-lint, sqlc, migrate)
 
 # ── Datenbank (Docker) ────────────────────────────────────────
 .PHONY: db-up
-db-up: ## Lokale PostgreSQL starten (Phase 1)
-	@echo "[TODO Phase 1] docker compose up -d db"
+db-up: ## Lokale PostgreSQL starten (Docker) + auf Healthcheck warten
+	docker compose up -d db
+	@echo ">> Warte auf PostgreSQL (healthcheck) ..."
+	@until [ "$$(docker inspect -f '{{.State.Health.Status}}' prekaj-db 2>/dev/null)" = "healthy" ]; do \
+		printf '.'; sleep 1; \
+	done; echo " bereit."
 
 .PHONY: db-down
-db-down: ## Lokale PostgreSQL stoppen (Phase 1)
-	@echo "[TODO Phase 1] docker compose stop db"
+db-down: ## Lokale PostgreSQL stoppen
+	docker compose stop db
 
 # ── Migrationen (golang-migrate) ──────────────────────────────
 .PHONY: migrate-up

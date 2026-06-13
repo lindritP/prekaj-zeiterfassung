@@ -34,19 +34,19 @@
 
 **Ziel:** lauffähige Go-API mit DB-Verbindung, Migrations- und Codegen-Workflow.
 
-- [ ] `cmd/api/main.go`: Start, **Graceful Shutdown** (SIGINT/SIGTERM), Port aus Env.
-- [ ] `internal/config`: Env-Parsing (`caarlos0/env`), lokal `godotenv`; Felder: `PORT`, `DATABASE_URL`, `JWT_SECRET`, `ENV`, `CORS_ORIGINS`.
-- [ ] `internal/platform`: **slog**-Logger (JSON in Prod, Text lokal); zentrales Fehler-Format.
-- [ ] `internal/server`: **chi**-Router, Middleware (RequestID, Logger, Recoverer, CORS, RateLimit-Platzhalter).
-- [ ] Healthchecks `GET /healthz` (liveness) + `GET /readyz` (DB-Ping).
-- [ ] `docker-compose.yml`: `postgres:17` mit Volume; `adminer`.
-- [ ] DB-Pool (`pgxpool`) in `internal/db`, Verbindungsaufbau + Ping beim Start.
-- [ ] **golang-migrate** einrichten; erste Migration `0001_init` (leer/Extensions, z. B. `pgcrypto`).
-- [ ] `make migrate-up/down/new` implementieren.
-- [ ] **sqlc** (`sqlc.yaml`, pgx/v5-Driver); `make sqlc` implementieren.
-- [ ] API-Versionierungs-Präfix `/api/v1` einrichten.
+- [x] `cmd/api/main.go`: Start, **Graceful Shutdown** (SIGINT/SIGTERM via `signal.NotifyContext`), Port aus Env.
+- [x] `internal/config`: Env-Parsing (`caarlos0/env/v11`), lokal `godotenv`; Felder: `PORT`, `DATABASE_URL`, `JWT_SECRET`, `ENV`, `CORS_ORIGINS`, `LOG_LEVEL`.
+- [x] `internal/platform`: **slog**-Logger (JSON in Prod, Text lokal) + Request-ID-Kontext; zentrales Fehler-Format `{ "error": { "code", "message" } }`.
+- [x] `internal/server`: **chi v5**-Router, Middleware (RequestID → slog-Logger → Recoverer → CORS → RateLimit `httprate`). `RealIP` bewusst weggelassen (in v5.3.0 deprecated/spoofbar).
+- [x] Healthchecks `GET /healthz` (liveness, immer 200) + `GET /readyz` (DB-Ping → 200/503).
+- [x] `docker-compose.yml` (Root): `postgres:17` mit Volume + Healthcheck; `adminer` (Port 8081).
+- [x] DB-Pool (`pgxpool`) in `internal/db/pool.go`, Verbindungsaufbau + Ping beim Start.
+- [x] **golang-migrate** eingerichtet; erste Migration `000001_init` (Extension `pgcrypto`).
+- [x] `make migrate-up/down/new` (bereits Phase 0 verdrahtet, jetzt genutzt).
+- [x] **sqlc** (`sqlc.yaml`, pgx/v5-Driver) + Platzhalter-Query `health.sql`; `make sqlc` generiert sauber.
+- [x] API-Versionierungs-Präfix `/api/v1` eingerichtet (gemountet, Routen folgen ab Phase 2).
 
-**DoD:** `make db-up && make migrate-up && make run-api` startet; `/healthz` + `/readyz` antworten 200.
+**DoD:** ✅ `make db-up && make migrate-up && make run-api` startet; `/healthz` + `/readyz` liefern 200 (verifiziert: 503 bei DB-Stop, Recovery, Graceful Shutdown). `go build`/`go vet`/`golangci-lint` clean.
 
 ---
 

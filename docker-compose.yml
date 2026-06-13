@@ -1,0 +1,35 @@
+# Local dev stack (Phase 1): PostgreSQL 17 + Adminer.
+# api/web containers are added in Phase 10. Env from root .env (see .env.example).
+
+services:
+  db:
+    image: postgres:17
+    container_name: prekaj-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-prekaj}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prekaj}
+      POSTGRES_DB: ${POSTGRES_DB:-prekaj}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - prekaj_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-prekaj} -d ${POSTGRES_DB:-prekaj}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  adminer:
+    image: adminer:latest
+    container_name: prekaj-adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  prekaj_pgdata:
