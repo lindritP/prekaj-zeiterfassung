@@ -87,6 +87,11 @@ run-api: ## Backend lokal starten (Phase 1)
 	@if [ -f "$(BACKEND_DIR)/cmd/api/main.go" ]; then cd $(BACKEND_DIR) && go run ./cmd/api; \
 	else echo "[TODO Phase 1] cmd/api/main.go fehlt noch"; fi
 
+.PHONY: seed
+seed: ## Initial-Admin anlegen/aktualisieren (Phase 2) — liest SEED_ADMIN_* aus .env
+	@if [ -f "$(BACKEND_DIR)/cmd/seed/main.go" ]; then cd $(BACKEND_DIR) && go run ./cmd/seed; \
+	else echo "[TODO Phase 2] cmd/seed/main.go fehlt"; fi
+
 .PHONY: run-web
 run-web: ## Web Dev-Server starten (Phase 8)
 	@echo "[TODO Phase 8] pnpm --filter @prekaj/web dev"

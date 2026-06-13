@@ -3,18 +3,28 @@
 package config
 
 import (
+	"time"
+
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
 
 // Config holds all runtime configuration. Populated from environment variables.
 type Config struct {
-	Env         string   `env:"ENV" envDefault:"development"`
-	Port        string   `env:"PORT" envDefault:"8080"`
-	LogLevel    string   `env:"LOG_LEVEL" envDefault:"info"`
-	DatabaseURL string   `env:"DATABASE_URL,required"`
-	JWTSecret   string   `env:"JWT_SECRET" envDefault:""`
-	CORSOrigins []string `env:"CORS_ORIGINS" envSeparator:","`
+	Env             string        `env:"ENV" envDefault:"development"`
+	Port            string        `env:"PORT" envDefault:"8080"`
+	LogLevel        string        `env:"LOG_LEVEL" envDefault:"info"`
+	DatabaseURL     string        `env:"DATABASE_URL,required"`
+	JWTSecret       string        `env:"JWT_SECRET,required"`
+	AccessTokenTTL  time.Duration `env:"ACCESS_TOKEN_TTL" envDefault:"15m"`
+	RefreshTokenTTL time.Duration `env:"REFRESH_TOKEN_TTL" envDefault:"720h"`
+	BcryptCost      int           `env:"BCRYPT_COST" envDefault:"12"`
+	CORSOrigins     []string      `env:"CORS_ORIGINS" envSeparator:","`
+
+	// Seed-Admin (nur von cmd/seed genutzt; im API-Prozess leer/ungenutzt).
+	SeedAdminEmail    string `env:"SEED_ADMIN_EMAIL"`
+	SeedAdminPassword string `env:"SEED_ADMIN_PASSWORD"`
+	SeedAdminName     string `env:"SEED_ADMIN_NAME"`
 }
 
 // IsProd reports whether the service runs in production mode.

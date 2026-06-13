@@ -43,9 +43,20 @@ func (s *Server) routes() http.Handler {
 	r.Get("/healthz", s.handleHealthz)
 	r.Get("/readyz", s.handleReadyz)
 
-	// Versioned API surface. Business routes are added in later phases.
-	r.Route("/api/v1", func(_ chi.Router) {
-		// Phase 2+: auth, arbeiter, baustellen, zeit, urlaub, ...
+	// Versioned API surface.
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/login", s.handleLogin)
+			r.Post("/refresh", s.handleRefresh)
+			r.Post("/logout", s.handleLogout)
+			r.With(s.requireAuth).Get("/me", s.handleMe)
+		})
+
+		// TEMPORÄRE DoD-Probe für Phase 2 — entfällt, sobald Phase 3 echte
+		// Admin-Routen bringt.
+		r.With(s.requireAuth, s.requireAdmin).Get("/admin/ping", func(w http.ResponseWriter, _ *http.Request) {
+			platform.WriteJSON(w, http.StatusOK, map[string]string{"status": "admin-ok"})
+		})
 	})
 
 	return r

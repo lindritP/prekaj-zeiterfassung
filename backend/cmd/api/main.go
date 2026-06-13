@@ -48,7 +48,10 @@ func run() error {
 	log.Info("database connected")
 
 	// 5. Router + HTTP server.
-	handler := server.New(cfg, log, pool)
+	handler, err := server.New(cfg, log, pool)
+	if err != nil {
+		return err
+	}
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
 		Handler:           handler,

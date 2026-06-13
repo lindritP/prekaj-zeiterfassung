@@ -54,18 +54,18 @@
 
 **Ziel:** Login/Logout/Refresh, rollenbasierter Zugriff, Seed-Admin.
 
-- [ ] Migration `arbeiter`: `id` (uuid v7), `name`, `email` (unique), `passwort_hash`, `rolle` (`arbeiter`|`admin`), `wochenstunden`, `stundenlohn`, `aktiv`, `created_at`, `updated_at`.
-- [ ] Migration `refresh_token`: `id`, `arbeiter_id` (FK), `token_hash`, `expires_at`, `revoked_at`, `created_at`.
-- [ ] sqlc-Queries: User by email/id, create user, insert/get/revoke refresh-token.
-- [ ] `internal/auth`: Passwort-Hashing (**bcrypt**, Cost ≥ 12).
-- [ ] JWT (`golang-jwt/jwt/v5`): Access-Token (~15 min) + Refresh-Token (rotierend), Signatur via `JWT_SECRET`.
-- [ ] Endpunkte: `POST /api/v1/auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me`.
-- [ ] **Web-Variante:** Refresh-Token als httpOnly/Secure/SameSite-Cookie setzen; CSRF berücksichtigen.
-- [ ] **Mobile-Variante:** Refresh-Token im Body/Header (Client legt in SecureStore ab).
-- [ ] Auth-Middleware: Token prüfen, `arbeiter`-Kontext setzen; **Rollen-Guard** (`requireAdmin`).
-- [ ] **Seed**: initialen Admin (Inhaber) anlegen (Migration oder `make seed`).
+- [x] Migration `arbeiter` (`000002_auth`): `id` (uuid v7, in Go erzeugt), `name`, `email` (citext UNIQUE), `passwort_hash`, `rolle` (TEXT+CHECK `arbeiter`|`admin`), `wochenstunden`/`stundenlohn` (numeric), `aktiv`, `created_at`, `updated_at`.
+- [x] Migration `refresh_token`: `id`, `arbeiter_id` (FK, ON DELETE CASCADE), `token_hash` (bytea, sha256), `expires_at`, `revoked_at`, `created_at`.
+- [x] sqlc-Queries: Arbeiter by email/id, create, UpsertAdmin; refresh-token create/get-by-hash/revoke/revoke-all. uuid→`google/uuid`, numeric→string, timestamptz→time.Time (sqlc-Overrides).
+- [x] `internal/auth`: Passwort-Hashing (**bcrypt**, Cost ≥ 12, 72-Byte-Limit).
+- [x] JWT (`golang-jwt/jwt/v5`): Access-Token (15 min, HS256, iss/sub/rolle/exp) + rotierender Refresh-Token (opaque, sha256-gehasht), Signatur via `JWT_SECRET`.
+- [x] Endpunkte: `POST /api/v1/auth/login`, `/refresh`, `/logout`, `GET /me`.
+- [x] **Web-Variante:** Refresh-Token als httpOnly/SameSite=Strict-Cookie (`Secure` nur in Prod — localhost ist http). CSRF: SameSite=Strict jetzt, Double-Submit-Token in Phase 13.
+- [x] **Mobile-Variante:** Refresh-Token im JSON-Body (`client:"mobile"`); Client legt in SecureStore ab.
+- [x] Auth-Middleware: `requireAuth` (Token prüfen, `Identity` in Kontext) + `requireAdmin`.
+- [x] **Seed**: `cmd/seed` + `make seed` (idempotenter UpsertAdmin aus `SEED_ADMIN_*`).
 
-**DoD:** Login liefert Tokens; geschützte Route nur mit gültigem Access-Token; Admin-Route blockt Arbeiter; Refresh rotiert.
+**DoD:** ✅ Login liefert Tokens; `/me` nur mit gültigem Access-Token (sonst 401); `/admin/ping` blockt Arbeiter (403); Refresh rotiert + altes Token ungültig. `make check` clean. *(Temporäre `/admin/ping`-Probe — entfällt in Phase 3.)*
 
 ---
 

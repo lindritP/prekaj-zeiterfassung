@@ -3,3 +3,31 @@
 //   sqlc v1.31.1
 
 package db
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type Arbeiter struct {
+	ID            uuid.UUID `json:"id"`
+	Name          string    `json:"name"`
+	Email         string    `json:"email"`
+	PasswortHash  string    `json:"passwort_hash"`
+	Rolle         string    `json:"rolle"`
+	Wochenstunden string    `json:"wochenstunden"`
+	Stundenlohn   string    `json:"stundenlohn"`
+	Aktiv         bool      `json:"aktiv"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+type RefreshToken struct {
+	ID         uuid.UUID  `json:"id"`
+	ArbeiterID uuid.UUID  `json:"arbeiter_id"`
+	TokenHash  []byte     `json:"token_hash"`
+	ExpiresAt  time.Time  `json:"expires_at"`
+	RevokedAt  *time.Time `json:"revoked_at"`
+	CreatedAt  time.Time  `json:"created_at"`
+}
