@@ -69,6 +69,9 @@ func (s *Server) routes() http.Handler {
 				r.Get("/", s.handleListOwnUrlaub)
 				r.Delete("/{id}", s.handleDeleteUrlaub)
 			})
+
+			// Überstunden — Arbeiter (Phase 6): eigener Monats-Saldo.
+			r.Get("/ueberstunden", s.handleOwnUeberstunden)
 		})
 
 		// Admin-Stammdaten (Phase 3): alles hinter requireAuth + requireAdmin.
@@ -99,6 +102,9 @@ func (s *Server) routes() http.Handler {
 				r.Get("/", s.handleAdminListUrlaub)
 				r.Patch("/{id}", s.handleDecideUrlaub)
 			})
+
+			// Überstunden — Admin (Phase 6): Saldo aller (oder ?arbeiter=) je Monat.
+			r.Get("/admin/ueberstunden", s.handleAdminUeberstunden)
 		})
 	})
 

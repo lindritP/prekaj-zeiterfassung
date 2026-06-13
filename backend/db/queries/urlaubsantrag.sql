@@ -39,3 +39,13 @@ UPDATE urlaubsantrag
        entschieden_am  = now()
  WHERE id = sqlc.arg('id') AND status = 'offen'
 RETURNING *;
+
+-- name: ListGenehmigteAbwesenheit :many
+-- Genehmigte Urlaube/Krankmeldungen, die sich mit [von, bis] überschneiden.
+-- Für die Überstunden-Berechnung (Phase 6): diese Tage gelten als Soll erfüllt.
+SELECT arbeiter_id, von_datum, bis_datum FROM urlaubsantrag
+WHERE status = 'genehmigt'
+  AND typ IN ('urlaub', 'krankheit')
+  AND von_datum <= sqlc.arg('bis')::date
+  AND bis_datum >= sqlc.arg('von')::date
+  AND (sqlc.narg('arbeiter_id')::uuid IS NULL OR arbeiter_id = sqlc.narg('arbeiter_id')::uuid);

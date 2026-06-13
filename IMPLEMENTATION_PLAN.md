@@ -117,13 +117,13 @@
 
 **Ziel:** transparenter Überstunden-Saldo (siehe offene Regeln in `CLAUDE.md` §13).
 
-- [ ] `arbeiter.wochenstunden` als Soll-Basis nutzen; Monats-Soll daraus ableiten.
-- [ ] Berechnung Saldo je Arbeiter/Monat: Ist (Summe `zeitbuchung`-Dauer) − Soll.
-- [ ] Endpunkte: `GET /api/v1/ueberstunden` (eigene, je Monat) + `GET /admin/ueberstunden` (alle).
-- [ ] Edge Cases entsprechend bestätigter Regeln (Urlaub/Krank/Feiertage, Rundung, Minusstunden).
-- [ ] (Optional) Monatliche Persistenz `ueberstunden_saldo`, falls Performance/Historie nötig.
+- [x] `arbeiter.wochenstunden` als Soll-Basis; **Monats-Soll = (wochenstunden/5) × Werktage(Mo–Fr)** (workdays-basiert, bestätigt).
+- [x] Berechnung Saldo je Arbeiter/Monat: Ist (Summe `zeitbuchung`-Dauer im Monat) − effektives Soll. On-demand (keine Tabelle).
+- [x] Endpunkte: `GET /api/v1/ueberstunden` (eigene, `?jahr=&monat=`, Default aktueller Monat) + `GET /api/v1/admin/ueberstunden` (alle aktiven oder `?arbeiter=`).
+- [x] Regeln (bestätigt): **Urlaub/Krankheit = Soll erfüllt** (genehmigte Tage reduzieren Soll), keine Rundung, **Minusstunden erlaubt**. Feiertage **noch nicht** ausgenommen (§13 "später").
+- [ ] (Optional) Monatliche Persistenz `ueberstunden_saldo` — zurückgestellt (on-demand reicht aktuell).
 
-**DoD:** Saldo pro Arbeiter/Monat korrekt berechnet und über API abrufbar (eigene + Admin).
+**DoD:** ✅ Saldo pro Arbeiter/Monat korrekt (verifiziert: Soll 480×(22−5)=8160, Ist 480, Saldo −7680) — eigene + Admin (Array + `?arbeiter=`). Edges: monat=13/jahr-allein → 400, Arbeiter→Admin-Route → 403. `make check` clean.
 
 ---
 

@@ -201,6 +201,49 @@ func (q *Queries) GetUrlaubsantragByIDForArbeiter(ctx context.Context, arg GetUr
 	return i, err
 }
 
+const listGenehmigteAbwesenheit = `-- name: ListGenehmigteAbwesenheit :many
+SELECT arbeiter_id, von_datum, bis_datum FROM urlaubsantrag
+WHERE status = 'genehmigt'
+  AND typ IN ('urlaub', 'krankheit')
+  AND von_datum <= $1::date
+  AND bis_datum >= $2::date
+  AND ($3::uuid IS NULL OR arbeiter_id = $3::uuid)
+`
+
+type ListGenehmigteAbwesenheitParams struct {
+	Bis        time.Time  `json:"bis"`
+	Von        time.Time  `json:"von"`
+	ArbeiterID *uuid.UUID `json:"arbeiter_id"`
+}
+
+type ListGenehmigteAbwesenheitRow struct {
+	ArbeiterID uuid.UUID `json:"arbeiter_id"`
+	VonDatum   time.Time `json:"von_datum"`
+	BisDatum   time.Time `json:"bis_datum"`
+}
+
+// Genehmigte Urlaube/Krankmeldungen, die sich mit [von, bis] überschneiden.
+// Für die Überstunden-Berechnung (Phase 6): diese Tage gelten als Soll erfüllt.
+func (q *Queries) ListGenehmigteAbwesenheit(ctx context.Context, arg ListGenehmigteAbwesenheitParams) ([]ListGenehmigteAbwesenheitRow, error) {
+	rows, err := q.db.Query(ctx, listGenehmigteAbwesenheit, arg.Bis, arg.Von, arg.ArbeiterID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListGenehmigteAbwesenheitRow
+	for rows.Next() {
+		var i ListGenehmigteAbwesenheitRow
+		if err := rows.Scan(&i.ArbeiterID, &i.VonDatum, &i.BisDatum); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listOwnUrlaubsantrag = `-- name: ListOwnUrlaubsantrag :many
 SELECT id, arbeiter_id, von_datum, bis_datum, typ, status, grund, entschieden_von, entschieden_am, created_at FROM urlaubsantrag
 WHERE arbeiter_id = $1
