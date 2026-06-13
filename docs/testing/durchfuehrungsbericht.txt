@@ -1,0 +1,95 @@
+==================================================================
+ DURCHFÜHRUNGSBERICHT — Unittests Überstunden-Berechnung
+ Komponente: backend/internal/server/ueberstunden.go
+ Werkzeug: go test + go cover | Ziel: Entscheidungsüberdeckung
+==================================================================
+
+=== RUN   TestMonthBounds
+=== RUN   TestMonthBounds/MB1_normaler_Monat
+=== RUN   TestMonthBounds/MB2_Jahreswechsel_Dez
+--- PASS: TestMonthBounds (0.00s)
+    --- PASS: TestMonthBounds/MB1_normaler_Monat (0.00s)
+    --- PASS: TestMonthBounds/MB2_Jahreswechsel_Dez (0.00s)
+=== RUN   TestCountWeekdays
+=== RUN   TestCountWeekdays/CW1_ganzer_Januar_2023
+=== RUN   TestCountWeekdays/CW2_eine_Woche_Mo-Mo
+=== RUN   TestCountWeekdays/CW3_nur_Wochenende_Sa-Mo
+=== RUN   TestCountWeekdays/CW4_leerer_Bereich
+=== RUN   TestCountWeekdays/CW5_ein_Werktag_Mo-Di
+--- PASS: TestCountWeekdays (0.00s)
+    --- PASS: TestCountWeekdays/CW1_ganzer_Januar_2023 (0.00s)
+    --- PASS: TestCountWeekdays/CW2_eine_Woche_Mo-Mo (0.00s)
+    --- PASS: TestCountWeekdays/CW3_nur_Wochenende_Sa-Mo (0.00s)
+    --- PASS: TestCountWeekdays/CW4_leerer_Bereich (0.00s)
+    --- PASS: TestCountWeekdays/CW5_ein_Werktag_Mo-Di (0.00s)
+=== RUN   TestCreditedWorkdays
+=== RUN   TestCreditedWorkdays/CR1_Zeile_komplett_im_Monat_Mo-Fr
+=== RUN   TestCreditedWorkdays/CR2_Beginn_vor_Monat_->_clamp
+=== RUN   TestCreditedWorkdays/CR3_Ende_nach_Monat_->_end-exklusiv
+=== RUN   TestCreditedWorkdays/CR4_Überlappung_dedupliziert
+=== RUN   TestCreditedWorkdays/CR5_nur_Wochenende
+=== RUN   TestCreditedWorkdays/CR6_keine_Zeilen
+--- PASS: TestCreditedWorkdays (0.00s)
+    --- PASS: TestCreditedWorkdays/CR1_Zeile_komplett_im_Monat_Mo-Fr (0.00s)
+    --- PASS: TestCreditedWorkdays/CR2_Beginn_vor_Monat_->_clamp (0.00s)
+    --- PASS: TestCreditedWorkdays/CR3_Ende_nach_Monat_->_end-exklusiv (0.00s)
+    --- PASS: TestCreditedWorkdays/CR4_Überlappung_dedupliziert (0.00s)
+    --- PASS: TestCreditedWorkdays/CR5_nur_Wochenende (0.00s)
+    --- PASS: TestCreditedWorkdays/CR6_keine_Zeilen (0.00s)
+=== RUN   TestSollMinuten
+=== RUN   TestSollMinuten/SM1_40h,_22_Tage
+=== RUN   TestSollMinuten/SM2_Rundung_40.3h,_1_Tag
+=== RUN   TestSollMinuten/SM3_unparsbar_->_0
+=== RUN   TestSollMinuten/SM4_leer_->_0
+=== RUN   TestSollMinuten/SM5_0_Tage_->_0
+--- PASS: TestSollMinuten (0.00s)
+    --- PASS: TestSollMinuten/SM1_40h,_22_Tage (0.00s)
+    --- PASS: TestSollMinuten/SM2_Rundung_40.3h,_1_Tag (0.00s)
+    --- PASS: TestSollMinuten/SM3_unparsbar_->_0 (0.00s)
+    --- PASS: TestSollMinuten/SM4_leer_->_0 (0.00s)
+    --- PASS: TestSollMinuten/SM5_0_Tage_->_0 (0.00s)
+=== RUN   TestComputeUeberstunden
+=== RUN   TestComputeUeberstunden/CU1_mit_Abwesenheit,_positives_Saldo
+=== RUN   TestComputeUeberstunden/CU2_ohne_Abwesenheit,_negatives_Saldo_(Minusstunden)
+--- PASS: TestComputeUeberstunden (0.00s)
+    --- PASS: TestComputeUeberstunden/CU1_mit_Abwesenheit,_positives_Saldo (0.00s)
+    --- PASS: TestComputeUeberstunden/CU2_ohne_Abwesenheit,_negatives_Saldo_(Minusstunden) (0.00s)
+=== RUN   TestParseMonat
+=== RUN   TestParseMonat/PM1_beide_fehlen_->_jetzt
+=== RUN   TestParseMonat/PM2_monat_fehlt_->_400
+=== RUN   TestParseMonat/PM3_jahr_fehlt_->_400
+=== RUN   TestParseMonat/PM4_jahr_nicht_numerisch_->_400
+=== RUN   TestParseMonat/PM5_jahr_<_2000_->_400
+=== RUN   TestParseMonat/PM6_jahr_>_2100_->_400
+=== RUN   TestParseMonat/PM7_monat_nicht_numerisch_->_400
+=== RUN   TestParseMonat/PM8_monat_<_1_->_400
+=== RUN   TestParseMonat/PM9_monat_>_12_->_400
+=== RUN   TestParseMonat/PM10_gültig
+=== RUN   TestParseMonat/PM11_Grenzwert_min_gültig
+=== RUN   TestParseMonat/PM12_Grenzwert_max_gültig
+--- PASS: TestParseMonat (0.00s)
+    --- PASS: TestParseMonat/PM1_beide_fehlen_->_jetzt (0.00s)
+    --- PASS: TestParseMonat/PM2_monat_fehlt_->_400 (0.00s)
+    --- PASS: TestParseMonat/PM3_jahr_fehlt_->_400 (0.00s)
+    --- PASS: TestParseMonat/PM4_jahr_nicht_numerisch_->_400 (0.00s)
+    --- PASS: TestParseMonat/PM5_jahr_<_2000_->_400 (0.00s)
+    --- PASS: TestParseMonat/PM6_jahr_>_2100_->_400 (0.00s)
+    --- PASS: TestParseMonat/PM7_monat_nicht_numerisch_->_400 (0.00s)
+    --- PASS: TestParseMonat/PM8_monat_<_1_->_400 (0.00s)
+    --- PASS: TestParseMonat/PM9_monat_>_12_->_400 (0.00s)
+    --- PASS: TestParseMonat/PM10_gültig (0.00s)
+    --- PASS: TestParseMonat/PM11_Grenzwert_min_gültig (0.00s)
+    --- PASS: TestParseMonat/PM12_Grenzwert_max_gültig (0.00s)
+PASS
+coverage: 4.8% of statements
+ok  	github.com/lindritP/prekaj-zeiterfassung/backend/internal/server	(cached)	coverage: 4.8% of statements
+
+=== Coverage je Funktion (ueberstunden.go) ===
+github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/ueberstunden.go:30:	monthBounds			100.0%
+github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/ueberstunden.go:37:	countWeekdays			100.0%
+github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/ueberstunden.go:50:	creditedWorkdays		100.0%
+github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/ueberstunden.go:68:	sollMinuten			100.0%
+github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/ueberstunden.go:77:	parseMonat			100.0%
+github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/ueberstunden.go:101:	computeUeberstunden		85.7%
+github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/ueberstunden.go:124:	handleOwnUeberstunden		0.0%
+github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/ueberstunden.go:157:	handleAdminUeberstunden		0.0%

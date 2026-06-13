@@ -129,6 +129,37 @@ build: ## Backend-Binary + Web-Build
 check: lint typecheck build ## lint + typecheck + build (vor jedem Commit)
 	@echo ">> check OK"
 
+# ── Tests & Coverage (Codequality-Übung) ──────────────────────
+# Komponente: internal/server/ueberstunden.go (Überstunden-Berechnung)
+TEST_RUN := MonthBounds|CountWeekdays|CreditedWorkdays|SollMinuten|ComputeUeberstunden|ParseMonat
+
+.PHONY: test
+test: ## Unittests der Komponente ausführen (verbose)
+	cd $(BACKEND_DIR) && go test ./internal/server/ -run '$(TEST_RUN)' -v
+
+.PHONY: coverage
+coverage: ## Coverage + HTML + Test-Report + Durchführungsbericht erzeugen
+	@mkdir -p docs/testing
+	cd $(BACKEND_DIR) && go test ./internal/server/ -run '$(TEST_RUN)' -covermode=count -coverprofile=coverage.out
+	cd $(BACKEND_DIR) && go tool cover -html=coverage.out -o coverage.html
+	cd $(BACKEND_DIR) && go test ./internal/server/ -run '$(TEST_RUN)' -json > test-report.json
+	@{ echo "=================================================================="; \
+	   echo " DURCHFÜHRUNGSBERICHT — Unittests Überstunden-Berechnung"; \
+	   echo " Komponente: backend/internal/server/ueberstunden.go"; \
+	   echo " Werkzeug: go test + go cover | Ziel: Entscheidungsüberdeckung"; \
+	   echo "=================================================================="; echo; \
+	   cd $(BACKEND_DIR) && go test ./internal/server/ -run '$(TEST_RUN)' -v -covermode=count -coverprofile=coverage.out; \
+	   echo; echo "=== Coverage je Funktion (ueberstunden.go) ==="; \
+	   go tool cover -func=coverage.out | grep ueberstunden.go; \
+	 } > docs/testing/durchfuehrungsbericht.txt 2>&1
+	cd $(BACKEND_DIR) && go tool cover -func=coverage.out | grep ueberstunden.go
+	@echo ">> coverage.out / coverage.html / test-report.json + docs/testing/durchfuehrungsbericht.txt"
+
+.PHONY: sonar
+sonar: ## SonarQube-Scan: make sonar TOKEN=<token> [URL=http://localhost:9000]
+	@if [ -z "$(TOKEN)" ]; then echo "Fehler: TOKEN=<sonar-token> angeben"; exit 1; fi
+	cd $(BACKEND_DIR) && sonar-scanner -Dsonar.host.url=$(or $(URL),http://localhost:9000) -Dsonar.token=$(TOKEN)
+
 # ── Container ─────────────────────────────────────────────────
 .PHONY: docker-build
 docker-build: ## Images für linux/amd64 bauen (Phase 10)

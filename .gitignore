@@ -5,6 +5,9 @@
 !.vscode/extensions.json
 *.swp
 
+# MS Office Sperr-/Temp-Dateien (z. B. ~$datei.docx)
+~$*
+
 # ── Secrets / Env ─────────────────────────────────────────────
 .env
 .env.*
@@ -47,6 +50,10 @@ vendor/
 build/
 bin/
 dist/
+
+# ── SonarQube scanner working dir ─────────────────────────────
+.scannerwork/
+.sonar/
 
 # ── Docker ────────────────────────────────────────────────────
 *.local.yml

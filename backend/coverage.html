@@ -1,0 +1,2414 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>server: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/arbeiter.go (0.0%)</option>
+				
+				<option value="file1">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/auth.go (0.0%)</option>
+				
+				<option value="file2">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/auth_helpers.go (0.0%)</option>
+				
+				<option value="file3">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/auth_middleware.go (0.0%)</option>
+				
+				<option value="file4">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/baustelle.go (0.0%)</option>
+				
+				<option value="file5">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/bericht.go (4.9%)</option>
+				
+				<option value="file6">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/context.go (0.0%)</option>
+				
+				<option value="file7">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/dokument.go (0.0%)</option>
+				
+				<option value="file8">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/handler_helpers.go (0.0%)</option>
+				
+				<option value="file9">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/health.go (0.0%)</option>
+				
+				<option value="file10">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/middleware.go (0.0%)</option>
+				
+				<option value="file11">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/router.go (0.0%)</option>
+				
+				<option value="file12">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/server.go (0.0%)</option>
+				
+				<option value="file13">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/ueberstunden.go (41.0%)</option>
+				
+				<option value="file14">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/urlaubsantrag.go (0.0%)</option>
+				
+				<option value="file15">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/validation.go (0.0%)</option>
+				
+				<option value="file16">github.com/lindritP/prekaj-zeiterfassung/backend/internal/server/zeitbuchung.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package server
+
+import (
+        "errors"
+        "net/http"
+
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+// arbeiterResponse is the admin-facing view. It deliberately OMITS passwort_hash.
+type arbeiterResponse struct {
+        ID            uuid.UUID `json:"id"`
+        Name          string    `json:"name"`
+        Email         string    `json:"email"`
+        Rolle         string    `json:"rolle"`
+        Wochenstunden string    `json:"wochenstunden"`
+        Stundenlohn   string    `json:"stundenlohn"`
+        Aktiv         bool      `json:"aktiv"`
+        CreatedAt     string    `json:"created_at"`
+        UpdatedAt     string    `json:"updated_at"`
+}
+
+func toArbeiterResponse(a db.Arbeiter) arbeiterResponse <span class="cov0" title="0">{
+        return arbeiterResponse{
+                ID:            a.ID,
+                Name:          a.Name,
+                Email:         a.Email,
+                Rolle:         a.Rolle,
+                Wochenstunden: a.Wochenstunden,
+                Stundenlohn:   a.Stundenlohn,
+                Aktiv:         a.Aktiv,
+                CreatedAt:     a.CreatedAt.UTC().Format(timeFormat),
+                UpdatedAt:     a.UpdatedAt.UTC().Format(timeFormat),
+        }
+}</span>
+
+type createArbeiterRequest struct {
+        Name          string `json:"name"          validate:"required,max=200"`
+        Email         string `json:"email"         validate:"required,email,max=255"`
+        Passwort      string `json:"passwort"      validate:"required,min=8,max=72"`
+        Rolle         string `json:"rolle"         validate:"omitempty,oneof=arbeiter admin"`
+        Wochenstunden string `json:"wochenstunden" validate:"omitempty,numeric"`
+        Stundenlohn   string `json:"stundenlohn"   validate:"omitempty,numeric"`
+}
+
+// updateArbeiterRequest uses pointers so "absent" (nil) differs from "set to empty".
+type updateArbeiterRequest struct {
+        Name          *string `json:"name"          validate:"omitempty,max=200"`
+        Email         *string `json:"email"         validate:"omitempty,email,max=255"`
+        Passwort      *string `json:"passwort"      validate:"omitempty,min=8,max=72"`
+        Rolle         *string `json:"rolle"         validate:"omitempty,oneof=arbeiter admin"`
+        Wochenstunden *string `json:"wochenstunden" validate:"omitempty,numeric"`
+        Stundenlohn   *string `json:"stundenlohn"   validate:"omitempty,numeric"`
+        Aktiv         *bool   `json:"aktiv"`
+}
+
+func (s *Server) handleListArbeiter(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        aktiv, ok := parseAktivFilter(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">rows, err := s.queries.ListArbeiter(r.Context(), aktiv)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">out := make([]arbeiterResponse, 0, len(rows))
+        for _, a := range rows </span><span class="cov0" title="0">{
+                out = append(out, toArbeiterResponse(a))
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, out)</span>
+}
+
+func (s *Server) handleCreateArbeiter(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var req createArbeiterRequest
+        if !s.decodeAndValidate(w, r, &amp;req) </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">hash, err := s.hasher.Hash(req.Passwort)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">id, err := uuid.NewV7()
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">rolle := req.Rolle
+        if rolle == "" </span><span class="cov0" title="0">{
+                rolle = "arbeiter"
+        }</span>
+        <span class="cov0" title="0">a, err := s.queries.CreateArbeiter(r.Context(), db.CreateArbeiterParams{
+                ID:            id,
+                Name:          req.Name,
+                Email:         normalizeEmail(req.Email),
+                PasswortHash:  hash,
+                Rolle:         rolle,
+                Wochenstunden: defaultNumeric(req.Wochenstunden),
+                Stundenlohn:   defaultNumeric(req.Stundenlohn),
+                Aktiv:         true,
+        })
+        if isUniqueViolation(err) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusConflict, "email_taken", "E-Mail ist bereits vergeben.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusCreated, toArbeiterResponse(a))</span>
+}
+
+func (s *Server) handleGetArbeiter(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">a, err := s.queries.GetArbeiterByID(r.Context(), id)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Arbeiter nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toArbeiterResponse(a))</span>
+}
+
+func (s *Server) handlePatchArbeiter(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">var req updateArbeiterRequest
+        if !s.decodeAndValidate(w, r, &amp;req) </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">params := db.UpdateArbeiterParams{
+                ID:            id,
+                Name:          req.Name,
+                Rolle:         req.Rolle,
+                Wochenstunden: req.Wochenstunden,
+                Stundenlohn:   req.Stundenlohn,
+                Aktiv:         req.Aktiv,
+        }
+        if req.Email != nil </span><span class="cov0" title="0">{
+                norm := normalizeEmail(*req.Email)
+                params.Email = &amp;norm
+        }</span>
+        <span class="cov0" title="0">if req.Passwort != nil </span><span class="cov0" title="0">{
+                hash, err := s.hasher.Hash(*req.Passwort)
+                if err != nil </span><span class="cov0" title="0">{
+                        s.serverError(w, r, err)
+                        return
+                }</span>
+                <span class="cov0" title="0">params.PasswortHash = &amp;hash</span>
+        }
+
+        <span class="cov0" title="0">a, err := s.queries.UpdateArbeiter(r.Context(), params)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Arbeiter nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if isUniqueViolation(err) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusConflict, "email_taken", "E-Mail ist bereits vergeben.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toArbeiterResponse(a))</span>
+}
+
+func (s *Server) handleDeactivateArbeiter(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">a, err := s.queries.DeactivateArbeiter(r.Context(), id)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Arbeiter nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toArbeiterResponse(a))</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package server
+
+import (
+        "encoding/json"
+        "errors"
+        "net/http"
+        "time"
+
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/auth"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+type loginRequest struct {
+        Email    string `json:"email"`
+        Passwort string `json:"passwort"`
+        Client   string `json:"client"` // "web" (default) | "mobile"
+}
+
+type arbeiterDTO struct {
+        ID    uuid.UUID `json:"id"`
+        Name  string    `json:"name"`
+        Email string    `json:"email"`
+        Rolle string    `json:"rolle"`
+}
+
+type tokenResponse struct {
+        AccessToken  string      `json:"access_token"`
+        RefreshToken string      `json:"refresh_token,omitempty"` // mobile only
+        Arbeiter     arbeiterDTO `json:"arbeiter"`
+}
+
+func toArbeiterDTO(a db.Arbeiter) arbeiterDTO <span class="cov0" title="0">{
+        return arbeiterDTO{ID: a.ID, Name: a.Name, Email: a.Email, Rolle: a.Rolle}
+}</span>
+
+// handleLogin authenticates by email+password and issues tokens.
+func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var req loginRequest
+        if err := json.NewDecoder(r.Body).Decode(&amp;req); err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültige Anfrage.")
+                return
+        }</span>
+
+        <span class="cov0" title="0">a, err := s.queries.GetArbeiterByEmail(r.Context(), normalizeEmail(req.Email))
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                // Timing-safe: spend a bcrypt compare even for unknown emails.
+                s.hasher.Verify(s.dummyHash, req.Passwort)
+                platform.WriteError(w, http.StatusUnauthorized, "invalid_credentials", "E-Mail oder Passwort falsch.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">if !a.Aktiv || !s.hasher.Verify(a.PasswortHash, req.Passwort) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusUnauthorized, "invalid_credentials", "E-Mail oder Passwort falsch.")
+                return
+        }</span>
+        <span class="cov0" title="0">s.issueTokens(w, r, a, req.Client)</span>
+}
+
+// handleRefresh rotates the refresh token: validate -&gt; revoke old -&gt; issue new.
+func (s *Server) handleRefresh(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        raw, client := s.readRefreshToken(r)
+        if raw == "" </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusUnauthorized, "unauthorized", "Kein Refresh-Token.")
+                return
+        }</span>
+        <span class="cov0" title="0">rt, err := s.queries.GetRefreshTokenByHash(r.Context(), auth.HashRefreshToken(raw))
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusUnauthorized, "unauthorized", "Refresh-Token ungültig.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">if rt.RevokedAt != nil || rt.ExpiresAt.Before(time.Now()) </span><span class="cov0" title="0">{
+                // Replay of a revoked/expired token =&gt; treat the whole family as compromised.
+                _ = s.queries.RevokeAllRefreshTokensForArbeiter(r.Context(), rt.ArbeiterID)
+                platform.WriteError(w, http.StatusUnauthorized, "unauthorized", "Refresh-Token ungültig.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err := s.queries.RevokeRefreshToken(r.Context(), rt.ID); err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">a, err := s.queries.GetArbeiterByID(r.Context(), rt.ArbeiterID)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">s.issueTokens(w, r, a, client)</span>
+}
+
+// handleLogout revokes the presented refresh token and clears the web cookie.
+func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        if raw, _ := s.readRefreshToken(r); raw != "" </span><span class="cov0" title="0">{
+                if rt, err := s.queries.GetRefreshTokenByHash(r.Context(), auth.HashRefreshToken(raw)); err == nil </span><span class="cov0" title="0">{
+                        _ = s.queries.RevokeRefreshToken(r.Context(), rt.ID)
+                }</span>
+        }
+        <span class="cov0" title="0">s.clearRefreshCookie(w)
+        w.WriteHeader(http.StatusNoContent)</span>
+}
+
+// handleMe returns the authenticated arbeiter (requireAuth guarantees identity).
+func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        a, err := s.queries.GetArbeiterByID(r.Context(), ident.ArbeiterID)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toArbeiterDTO(a))</span>
+}
+
+// issueTokens mints an access token + a rotating refresh token and delivers the
+// refresh token per client: web =&gt; httpOnly cookie, mobile =&gt; JSON body.
+func (s *Server) issueTokens(w http.ResponseWriter, r *http.Request, a db.Arbeiter, client string) <span class="cov0" title="0">{
+        access, err := s.issuer.IssueAccessToken(a.ID, a.Rolle)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">rawRefresh, hash, err := auth.NewRefreshToken()
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">id, err := uuid.NewV7()
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">expires := time.Now().Add(s.cfg.RefreshTokenTTL)
+        if _, err := s.queries.CreateRefreshToken(r.Context(), db.CreateRefreshTokenParams{
+                ID:         id,
+                ArbeiterID: a.ID,
+                TokenHash:  hash,
+                ExpiresAt:  expires,
+        }); err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">resp := tokenResponse{AccessToken: access, Arbeiter: toArbeiterDTO(a)}
+        if client == "mobile" </span><span class="cov0" title="0">{
+                resp.RefreshToken = rawRefresh
+        }</span> else<span class="cov0" title="0"> {
+                s.setRefreshCookie(w, rawRefresh, expires)
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, resp)</span>
+}
+
+// readRefreshToken pulls the token from the web cookie or the mobile JSON body.
+func (s *Server) readRefreshToken(r *http.Request) (raw, client string) <span class="cov0" title="0">{
+        if c, err := r.Cookie(refreshCookieName); err == nil &amp;&amp; c.Value != "" </span><span class="cov0" title="0">{
+                return c.Value, "web"
+        }</span>
+        <span class="cov0" title="0">var body struct {
+                RefreshToken string `json:"refresh_token"`
+        }
+        _ = json.NewDecoder(r.Body).Decode(&amp;body)
+        return body.RefreshToken, "mobile"</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package server
+
+import (
+        "net/http"
+        "strings"
+        "time"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+const refreshCookieName = "prekaj_refresh"
+
+// normalizeEmail canonicalises an email for storage and lookup.
+func normalizeEmail(s string) string <span class="cov0" title="0">{
+        return strings.ToLower(strings.TrimSpace(s))
+}</span>
+
+// serverError logs the underlying error (request-id aware) and writes a 500.
+func (s *Server) serverError(w http.ResponseWriter, r *http.Request, err error) <span class="cov0" title="0">{
+        platform.LoggerFrom(r.Context(), s.log).Error("internal error", "err", err)
+        platform.WriteError(w, http.StatusInternalServerError, "internal_error", "Interner Serverfehler.")
+}</span>
+
+// setRefreshCookie writes the rotating refresh token as an httpOnly cookie (web).
+// Secure is enabled only in production so http://localhost works in dev.
+func (s *Server) setRefreshCookie(w http.ResponseWriter, value string, expires time.Time) <span class="cov0" title="0">{
+        http.SetCookie(w, &amp;http.Cookie{
+                Name:     refreshCookieName,
+                Value:    value,
+                Path:     "/api/v1/auth",
+                Expires:  expires,
+                HttpOnly: true,
+                Secure:   s.cfg.IsProd(),
+                SameSite: http.SameSiteStrictMode,
+        })
+}</span>
+
+// clearRefreshCookie expires the refresh cookie (web logout).
+func (s *Server) clearRefreshCookie(w http.ResponseWriter) <span class="cov0" title="0">{
+        http.SetCookie(w, &amp;http.Cookie{
+                Name:     refreshCookieName,
+                Value:    "",
+                Path:     "/api/v1/auth",
+                MaxAge:   -1,
+                HttpOnly: true,
+                Secure:   s.cfg.IsProd(),
+                SameSite: http.SameSiteStrictMode,
+        })
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package server
+
+import (
+        "net/http"
+        "strings"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+// requireAuth validates the Bearer access token and injects the Identity.
+func (s *Server) requireAuth(next http.Handler) http.Handler <span class="cov0" title="0">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                raw, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
+                if !ok || raw == "" </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusUnauthorized, "unauthorized", "Kein gültiges Token.")
+                        return
+                }</span>
+                <span class="cov0" title="0">ident, err := s.issuer.Verify(raw)
+                if err != nil </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusUnauthorized, "unauthorized", "Kein gültiges Token.")
+                        return
+                }</span>
+                <span class="cov0" title="0">next.ServeHTTP(w, r.WithContext(withIdentity(r.Context(), ident)))</span>
+        })
+}
+
+// requireAdmin must be chained AFTER requireAuth.
+func (s *Server) requireAdmin(next http.Handler) http.Handler <span class="cov0" title="0">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                ident, ok := identityFrom(r.Context())
+                if !ok || ident.Rolle != "admin" </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusForbidden, "forbidden", "Nur für Administratoren.")
+                        return
+                }</span>
+                <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+        })
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package server
+
+import (
+        "errors"
+        "net/http"
+
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+type baustelleResponse struct {
+        ID        uuid.UUID `json:"id"`
+        Name      string    `json:"name"`
+        Adresse   string    `json:"adresse"`
+        Aktiv     bool      `json:"aktiv"`
+        CreatedAt string    `json:"created_at"`
+        UpdatedAt string    `json:"updated_at"`
+}
+
+func toBaustelleResponse(b db.Baustelle) baustelleResponse <span class="cov0" title="0">{
+        return baustelleResponse{
+                ID:        b.ID,
+                Name:      b.Name,
+                Adresse:   b.Adresse,
+                Aktiv:     b.Aktiv,
+                CreatedAt: b.CreatedAt.UTC().Format(timeFormat),
+                UpdatedAt: b.UpdatedAt.UTC().Format(timeFormat),
+        }
+}</span>
+
+type createBaustelleRequest struct {
+        Name    string `json:"name"    validate:"required,max=200"`
+        Adresse string `json:"adresse" validate:"omitempty,max=500"`
+}
+
+type updateBaustelleRequest struct {
+        Name    *string `json:"name"    validate:"omitempty,max=200"`
+        Adresse *string `json:"adresse" validate:"omitempty,max=500"`
+        Aktiv   *bool   `json:"aktiv"`
+}
+
+func (s *Server) handleListBaustellen(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        aktiv, ok := parseAktivFilter(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">rows, err := s.queries.ListBaustellen(r.Context(), aktiv)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">out := make([]baustelleResponse, 0, len(rows))
+        for _, b := range rows </span><span class="cov0" title="0">{
+                out = append(out, toBaustelleResponse(b))
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, out)</span>
+}
+
+func (s *Server) handleCreateBaustelle(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var req createBaustelleRequest
+        if !s.decodeAndValidate(w, r, &amp;req) </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">id, err := uuid.NewV7()
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">b, err := s.queries.CreateBaustelle(r.Context(), db.CreateBaustelleParams{
+                ID:      id,
+                Name:    req.Name,
+                Adresse: req.Adresse,
+                Aktiv:   true,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusCreated, toBaustelleResponse(b))</span>
+}
+
+func (s *Server) handleGetBaustelle(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">b, err := s.queries.GetBaustelleByID(r.Context(), id)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Baustelle nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toBaustelleResponse(b))</span>
+}
+
+func (s *Server) handlePatchBaustelle(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">var req updateBaustelleRequest
+        if !s.decodeAndValidate(w, r, &amp;req) </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">b, err := s.queries.UpdateBaustelle(r.Context(), db.UpdateBaustelleParams{
+                ID:      id,
+                Name:    req.Name,
+                Adresse: req.Adresse,
+                Aktiv:   req.Aktiv,
+        })
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Baustelle nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toBaustelleResponse(b))</span>
+}
+
+func (s *Server) handleDeactivateBaustelle(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">b, err := s.queries.DeactivateBaustelle(r.Context(), id)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Baustelle nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toBaustelleResponse(b))</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package server
+
+import (
+        "errors"
+        "fmt"
+        "net/http"
+        "time"
+
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/pdf"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+// viennaLoc is the display timezone for reports (storage stays UTC). Embedded
+// tzdata (see cmd/api) guarantees this loads even in a distroless container.
+var viennaLoc = mustLoadVienna()
+
+func mustLoadVienna() *time.Location <span class="cov8" title="1">{
+        loc, err := time.LoadLocation("Europe/Vienna")
+        if err != nil </span><span class="cov0" title="0">{
+                return time.UTC
+        }</span>
+        <span class="cov8" title="1">return loc</span>
+}
+
+// handleMonatsbericht (admin) generates the monthly PDF report for one arbeiter.
+func (s *Server) handleMonatsbericht(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        arbeiterID, ok := parseOptionalUUIDQuery(w, r, "arbeiter")
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">if arbeiterID == nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Parameter arbeiter erforderlich.")
+                return
+        }</span>
+        <span class="cov0" title="0">jahr, monat, ok := parseMonat(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">start, end := monthBounds(jahr, monat)
+        lastDay := end.AddDate(0, 0, -1)
+
+        a, err := s.queries.GetArbeiterByID(r.Context(), *arbeiterID)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Arbeiter nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">zb, err := s.queries.AdminListZeitbuchung(r.Context(), db.AdminListZeitbuchungParams{
+                ArbeiterID: arbeiterID, Von: &amp;start, Bis: &amp;end,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">bsRows, err := s.queries.ListBaustellen(r.Context(), nil)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">bsName := make(map[uuid.UUID]string, len(bsRows))
+        for _, b := range bsRows </span><span class="cov0" title="0">{
+                bsName[b.ID] = b.Name
+        }</span>
+        <span class="cov0" title="0">ist, err := s.queries.AdminSumZeitbuchung(r.Context(), db.AdminSumZeitbuchungParams{
+                ArbeiterID: arbeiterID, Von: &amp;start, Bis: &amp;end,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">abw, err := s.queries.ListGenehmigteAbwesenheit(r.Context(), db.ListGenehmigteAbwesenheitParams{
+                Von: start, Bis: lastDay, ArbeiterID: arbeiterID,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">u := computeUeberstunden(a.ID, a.Name, jahr, monat, start, end, a.Wochenstunden, ist.SummeMinuten, abw)
+
+        zeilen := make([]pdf.BerichtZeile, 0, len(zb))
+        for _, z := range zb </span><span class="cov0" title="0">{
+                baustelle := "—"
+                if z.BaustelleID != nil </span><span class="cov0" title="0">{
+                        if n, found := bsName[*z.BaustelleID]; found </span><span class="cov0" title="0">{
+                                baustelle = n
+                        }</span>
+                }
+                <span class="cov0" title="0">ende, dauer := "läuft", "—"
+                if z.EndZeit != nil </span><span class="cov0" title="0">{
+                        ende = z.EndZeit.In(viennaLoc).Format("15:04")
+                        dm := dauerMinuten(z.StartZeit, *z.EndZeit, z.PauseMinuten)
+                        dauer = fmt.Sprintf("%d:%02d", dm/60, dm%60)
+                }</span>
+                <span class="cov0" title="0">zeilen = append(zeilen, pdf.BerichtZeile{
+                        Datum:     z.StartZeit.In(viennaLoc).Format("02.01.2006"),
+                        Baustelle: baustelle,
+                        Start:     z.StartZeit.In(viennaLoc).Format("15:04"),
+                        Ende:      ende,
+                        PauseMin:  z.PauseMinuten,
+                        Dauer:     dauer,
+                })</span>
+        }
+
+        <span class="cov0" title="0">pdfBytes, err := pdf.Monatsbericht(pdf.MonatsberichtData{
+                ArbeiterName:    a.Name,
+                Jahr:            jahr,
+                Monat:           monat,
+                Zeilen:          zeilen,
+                IstMinuten:      u.IstMinuten,
+                SollMinuten:     u.SollMinuten,
+                SaldoMinuten:    u.SaldoMinuten,
+                UrlaubKrankTage: u.UrlaubKrankTage,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">w.Header().Set("Content-Type", "application/pdf")
+        w.Header().Set("Content-Disposition",
+                fmt.Sprintf("inline; filename=%q", fmt.Sprintf("Monatsbericht_%d-%02d.pdf", jahr, monat)))
+        _, _ = w.Write(pdfBytes)</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package server
+
+import (
+        "context"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/auth"
+)
+
+type ctxKey int
+
+const identityKey ctxKey = iota
+
+// withIdentity stores the authenticated principal in the context.
+func withIdentity(ctx context.Context, id auth.Identity) context.Context <span class="cov0" title="0">{
+        return context.WithValue(ctx, identityKey, id)
+}</span>
+
+// identityFrom returns the principal placed by requireAuth, if present.
+func identityFrom(ctx context.Context) (auth.Identity, bool) <span class="cov0" title="0">{
+        id, ok := ctx.Value(identityKey).(auth.Identity)
+        return id, ok
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package server
+
+import (
+        "bytes"
+        "errors"
+        "fmt"
+        "io"
+        "net/http"
+        "path/filepath"
+        "strconv"
+
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+type dokumentResponse struct {
+        ID         uuid.UUID `json:"id"`
+        ArbeiterID uuid.UUID `json:"arbeiter_id"`
+        Typ        string    `json:"typ"`
+        Jahr       int32     `json:"jahr"`
+        Monat      int32     `json:"monat"`
+        Dateiname  string    `json:"dateiname"`
+        MimeType   string    `json:"mime_type"`
+        Groesse    int64     `json:"groesse"`
+        CreatedAt  string    `json:"created_at"`
+}
+
+func toDokumentResponse(d db.Dokument) dokumentResponse <span class="cov0" title="0">{
+        return dokumentResponse{
+                ID:         d.ID,
+                ArbeiterID: d.ArbeiterID,
+                Typ:        d.Typ,
+                Jahr:       d.Jahr,
+                Monat:      d.Monat,
+                Dateiname:  d.Dateiname,
+                MimeType:   d.MimeType,
+                Groesse:    d.Groesse,
+                CreatedAt:  d.CreatedAt.UTC().Format(timeFormat),
+        }
+}</span>
+
+// handleUploadDokument (admin) stores an uploaded PDF as a Lohnzettel for an arbeiter.
+func (s *Server) handleUploadDokument(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        maxBytes := int64(s.cfg.MaxUploadMB) * 1024 * 1024
+        r.Body = http.MaxBytesReader(w, r.Body, maxBytes+1024) // + form overhead
+        if err := r.ParseMultipartForm(maxBytes); err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Datei zu groß oder ungültiges Formular.")
+                return
+        }</span>
+
+        <span class="cov0" title="0">arbeiterID, err := uuid.Parse(r.FormValue("arbeiter_id"))
+        if err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültige arbeiter_id.")
+                return
+        }</span>
+        <span class="cov0" title="0">typ := r.FormValue("typ")
+        if typ == "" </span><span class="cov0" title="0">{
+                typ = "lohnzettel"
+        }</span>
+        <span class="cov0" title="0">if typ != "lohnzettel" &amp;&amp; typ != "sonstige" </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiger typ.")
+                return
+        }</span>
+        <span class="cov0" title="0">jahr, err := strconv.Atoi(r.FormValue("jahr"))
+        if err != nil || jahr &lt; 2000 || jahr &gt; 2100 </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiges jahr.")
+                return
+        }</span>
+        <span class="cov0" title="0">monat, err := strconv.Atoi(r.FormValue("monat"))
+        if err != nil || monat &lt; 1 || monat &gt; 12 </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiger monat (1-12).")
+                return
+        }</span>
+
+        <span class="cov0" title="0">file, header, err := r.FormFile("datei")
+        if err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Datei fehlt (Feld 'datei').")
+                return
+        }</span>
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{ _ = file.Close() }</span>()
+        <span class="cov0" title="0">buf, err := io.ReadAll(file)
+        if err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Datei zu groß.")
+                return
+        }</span>
+        <span class="cov0" title="0">if len(buf) == 0 || !bytes.HasPrefix(buf, []byte("%PDF-")) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Nur PDF-Dateien erlaubt.")
+                return
+        }</span>
+
+        // Arbeiter muss existieren (vermeidet verwaiste Dateien).
+        <span class="cov0" title="0">if _, err := s.queries.GetArbeiterByID(r.Context(), arbeiterID); errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Arbeiter nicht gefunden.")
+                return
+        }</span> else<span class="cov0" title="0"> if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">keyID, err := uuid.NewV7()
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">key := keyID.String() + ".pdf"
+        size, err := s.store.Save(r.Context(), key, bytes.NewReader(buf))
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">id, err := uuid.NewV7()
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">dok, err := s.queries.CreateDokument(r.Context(), db.CreateDokumentParams{
+                ID:         id,
+                ArbeiterID: arbeiterID,
+                Typ:        typ,
+                Jahr:       int32(jahr),
+                Monat:      int32(monat),
+                Dateiname:  filepath.Base(header.Filename),
+                StorageKey: key,
+                MimeType:   "application/pdf",
+                Groesse:    size,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusCreated, toDokumentResponse(dok))</span>
+}
+
+func (s *Server) handleListOwnDokument(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        rows, err := s.queries.ListOwnDokument(r.Context(), ident.ArbeiterID)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">out := make([]dokumentResponse, 0, len(rows))
+        for _, d := range rows </span><span class="cov0" title="0">{
+                out = append(out, toDokumentResponse(d))
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, out)</span>
+}
+
+func (s *Server) handleAdminListDokument(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        arbeiterFilter, ok := parseOptionalUUIDQuery(w, r, "arbeiter")
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">rows, err := s.queries.AdminListDokument(r.Context(), arbeiterFilter)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">out := make([]dokumentResponse, 0, len(rows))
+        for _, d := range rows </span><span class="cov0" title="0">{
+                out = append(out, toDokumentResponse(d))
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, out)</span>
+}
+
+// handleDownloadDokument streams a document. Worker may fetch only their own;
+// admin may fetch any. A foreign worker access returns 404 (no existence leak).
+func (s *Server) handleDownloadDokument(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">dok, err := s.queries.GetDokumentByID(r.Context(), id)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Dokument nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">if dok.ArbeiterID != ident.ArbeiterID &amp;&amp; ident.Rolle != "admin" </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Dokument nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">rc, err := s.store.Open(r.Context(), dok.StorageKey)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{ _ = rc.Close() }</span>()
+        <span class="cov0" title="0">w.Header().Set("Content-Type", dok.MimeType)
+        w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", dok.Dateiname))
+        if dok.Groesse &gt; 0 </span><span class="cov0" title="0">{
+                w.Header().Set("Content-Length", strconv.FormatInt(dok.Groesse, 10))
+        }</span>
+        <span class="cov0" title="0">_, _ = io.Copy(w, rc)</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package server
+
+import (
+        "errors"
+        "net/http"
+        "time"
+
+        "github.com/go-chi/chi/v5"
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5/pgconn"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+// timeFormat is the wire format for timestamps (RFC3339 in UTC).
+const timeFormat = "2006-01-02T15:04:05Z07:00"
+
+// parseIDParam reads {id} from the path and parses it as a UUID (400 on bad input).
+// A non-UUID id can never match a row, so we reject it early.
+func parseIDParam(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) <span class="cov0" title="0">{
+        id, err := uuid.Parse(chi.URLParam(r, "id"))
+        if err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültige ID.")
+                return uuid.Nil, false
+        }</span>
+        <span class="cov0" title="0">return id, true</span>
+}
+
+// parseAktivFilter reads the optional ?aktiv=true|false query param.
+// Absent =&gt; nil (no filter). Invalid value =&gt; 400.
+func parseAktivFilter(w http.ResponseWriter, r *http.Request) (*bool, bool) <span class="cov0" title="0">{
+        switch r.URL.Query().Get("aktiv") </span>{
+        case "":<span class="cov0" title="0">
+                return nil, true</span>
+        case "true":<span class="cov0" title="0">
+                v := true
+                return &amp;v, true</span>
+        case "false":<span class="cov0" title="0">
+                v := false
+                return &amp;v, true</span>
+        default:<span class="cov0" title="0">
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiger aktiv-Filter.")
+                return nil, false</span>
+        }
+}
+
+// isUniqueViolation reports whether err is a Postgres unique_violation (23505).
+func isUniqueViolation(err error) bool <span class="cov0" title="0">{
+        var pgErr *pgconn.PgError
+        return errors.As(err, &amp;pgErr) &amp;&amp; pgErr.Code == "23505"
+}</span>
+
+// defaultNumeric maps an empty optional numeric string to "0" so create always
+// receives a valid numeric literal (matches the column default).
+func defaultNumeric(s string) string <span class="cov0" title="0">{
+        if s == "" </span><span class="cov0" title="0">{
+                return "0"
+        }</span>
+        <span class="cov0" title="0">return s</span>
+}
+
+// isForeignKeyViolation reports a Postgres foreign_key_violation (23503), e.g. an
+// unknown baustelle_id referenced by a zeitbuchung.
+func isForeignKeyViolation(err error) bool <span class="cov0" title="0">{
+        var pgErr *pgconn.PgError
+        return errors.As(err, &amp;pgErr) &amp;&amp; pgErr.Code == "23503"
+}</span>
+
+// parseZeitraum reads optional ?von= &amp; ?bis= RFC3339 timestamps. Absent =&gt; nil.
+func parseZeitraum(w http.ResponseWriter, r *http.Request) (von, bis *time.Time, ok bool) <span class="cov0" title="0">{
+        parse := func(name string) (*time.Time, bool) </span><span class="cov0" title="0">{
+                raw := r.URL.Query().Get(name)
+                if raw == "" </span><span class="cov0" title="0">{
+                        return nil, true
+                }</span>
+                <span class="cov0" title="0">t, err := time.Parse(time.RFC3339, raw)
+                if err != nil </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiger "+name+"-Zeitpunkt (RFC3339).")
+                        return nil, false
+                }</span>
+                <span class="cov0" title="0">u := t.UTC()
+                return &amp;u, true</span>
+        }
+        <span class="cov0" title="0">von, ok = parse("von")
+        if !ok </span><span class="cov0" title="0">{
+                return nil, nil, false
+        }</span>
+        <span class="cov0" title="0">bis, ok = parse("bis")
+        if !ok </span><span class="cov0" title="0">{
+                return nil, nil, false
+        }</span>
+        <span class="cov0" title="0">return von, bis, true</span>
+}
+
+// parseOptionalUUIDQuery reads an optional ?name= UUID query param. Absent =&gt; nil.
+func parseOptionalUUIDQuery(w http.ResponseWriter, r *http.Request, name string) (*uuid.UUID, bool) <span class="cov0" title="0">{
+        raw := r.URL.Query().Get(name)
+        if raw == "" </span><span class="cov0" title="0">{
+                return nil, true
+        }</span>
+        <span class="cov0" title="0">id, err := uuid.Parse(raw)
+        if err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültige "+name+"-ID.")
+                return nil, false
+        }</span>
+        <span class="cov0" title="0">return &amp;id, true</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package server
+
+import (
+        "net/http"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+// handleHealthz is the liveness probe: always 200 if the process is up.
+func (s *Server) handleHealthz(w http.ResponseWriter, _ *http.Request) <span class="cov0" title="0">{
+        platform.WriteJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}</span>
+
+// handleReadyz is the readiness probe: 200 only if the DB ping succeeds, else 503.
+func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        if err := db.Ping(r.Context(), s.pool); err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusServiceUnavailable, "not_ready", "Datenbank nicht erreichbar")
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, map[string]string{"status": "ready"})</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package server
+
+import (
+        "net/http"
+        "time"
+
+        chimw "github.com/go-chi/chi/v5/middleware"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+// requestLogger is a structured slog request logger. It records method, path,
+// status, byte count and latency, tagged with the chi request id. No PII (DSGVO §11).
+func (s *Server) requestLogger(next http.Handler) http.Handler <span class="cov0" title="0">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                start := time.Now()
+                reqID := chimw.GetReqID(r.Context())
+
+                // Propagate the request id into our platform context for downstream loggers.
+                ctx := platform.WithRequestID(r.Context(), reqID)
+                r = r.WithContext(ctx)
+
+                ww := chimw.NewWrapResponseWriter(w, r.ProtoMajor)
+                next.ServeHTTP(ww, r)
+
+                s.log.Info("http_request",
+                        "request_id", reqID,
+                        "method", r.Method,
+                        "path", r.URL.Path,
+                        "status", ww.Status(),
+                        "bytes", ww.BytesWritten(),
+                        "duration_ms", time.Since(start).Milliseconds(),
+                )
+        }</span>)
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package server
+
+import (
+        "net/http"
+        "time"
+
+        "github.com/go-chi/chi/v5"
+        chimw "github.com/go-chi/chi/v5/middleware"
+        "github.com/go-chi/cors"
+        "github.com/go-chi/httprate"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+// routes builds the chi router with the standard middleware stack and mounts all
+// business routes under /api/v1. Health endpoints live at the root so probes hit
+// them directly. Auth middleware is added in Phase 2.
+func (s *Server) routes() http.Handler <span class="cov0" title="0">{
+        r := chi.NewRouter()
+
+        // Middleware stack (CLAUDE.md §7): RequestID -&gt; Logger -&gt; Recoverer -&gt; CORS -&gt; RateLimit.
+        r.Use(chimw.RequestID)
+        r.Use(s.requestLogger) // structured slog request logger (middleware.go)
+        r.Use(chimw.Recoverer)
+        r.Use(cors.Handler(cors.Options{
+                AllowedOrigins:   s.cfg.CORSOrigins,
+                AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodOptions},
+                AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+                ExposedHeaders:   []string{"Link"},
+                AllowCredentials: true, // Phase 2: refresh-token cookie (web)
+                MaxAge:           300,
+        }))
+        r.Use(httprate.Limit(
+                120, time.Minute,
+                httprate.WithKeyFuncs(httprate.KeyByIP),
+                httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusTooManyRequests, "rate_limited",
+                                "Zu viele Anfragen. Bitte später erneut versuchen.")
+                }</span>),
+        ))
+
+        // Health endpoints — at root, NOT under /api/v1.
+        <span class="cov0" title="0">r.Get("/healthz", s.handleHealthz)
+        r.Get("/readyz", s.handleReadyz)
+
+        // Versioned API surface.
+        r.Route("/api/v1", func(r chi.Router) </span><span class="cov0" title="0">{
+                r.Route("/auth", func(r chi.Router) </span><span class="cov0" title="0">{
+                        r.Post("/login", s.handleLogin)
+                        r.Post("/refresh", s.handleRefresh)
+                        r.Post("/logout", s.handleLogout)
+                        r.With(s.requireAuth).Get("/me", s.handleMe)
+                }</span>)
+
+                // Zeiterfassung — Arbeiter (Phase 4): requireAuth, Queries auf identity.ArbeiterID gescoped.
+                <span class="cov0" title="0">r.Group(func(r chi.Router) </span><span class="cov0" title="0">{
+                        r.Use(s.requireAuth)
+                        r.Route("/zeit", func(r chi.Router) </span><span class="cov0" title="0">{
+                                r.Post("/start", s.handleStartZeit)
+                                r.Post("/stop", s.handleStopZeit)
+                                r.Get("/laufend", s.handleGetLaufend) // statisch VOR /{id}
+                                r.Get("/", s.handleListOwnZeit)
+                                r.Patch("/{id}", s.handlePatchZeit)
+                        }</span>)
+
+                        // Urlaubsanträge — Arbeiter (Phase 5).
+                        <span class="cov0" title="0">r.Route("/urlaub", func(r chi.Router) </span><span class="cov0" title="0">{
+                                r.Post("/", s.handleCreateUrlaub)
+                                r.Get("/", s.handleListOwnUrlaub)
+                                r.Delete("/{id}", s.handleDeleteUrlaub)
+                        }</span>)
+
+                        // Überstunden — Arbeiter (Phase 6): eigener Monats-Saldo.
+                        <span class="cov0" title="0">r.Get("/ueberstunden", s.handleOwnUeberstunden)
+
+                        // Dokumente — Arbeiter (Phase 7): eigene Liste + Download (own-or-admin im Handler).
+                        r.Get("/dokumente", s.handleListOwnDokument)
+                        r.Get("/dokumente/{id}/download", s.handleDownloadDokument)</span>
+                })
+
+                // Admin-Stammdaten (Phase 3): alles hinter requireAuth + requireAdmin.
+                <span class="cov0" title="0">r.Group(func(r chi.Router) </span><span class="cov0" title="0">{
+                        r.Use(s.requireAuth, s.requireAdmin)
+
+                        r.Route("/arbeiter", func(r chi.Router) </span><span class="cov0" title="0">{
+                                r.Get("/", s.handleListArbeiter)
+                                r.Post("/", s.handleCreateArbeiter)
+                                r.Get("/{id}", s.handleGetArbeiter)
+                                r.Patch("/{id}", s.handlePatchArbeiter)
+                                r.Delete("/{id}", s.handleDeactivateArbeiter)
+                        }</span>)
+
+                        <span class="cov0" title="0">r.Route("/baustellen", func(r chi.Router) </span><span class="cov0" title="0">{
+                                r.Get("/", s.handleListBaustellen)
+                                r.Post("/", s.handleCreateBaustelle)
+                                r.Get("/{id}", s.handleGetBaustelle)
+                                r.Patch("/{id}", s.handlePatchBaustelle)
+                                r.Delete("/{id}", s.handleDeactivateBaustelle)
+                        }</span>)
+
+                        // Zeiterfassung — Admin (Phase 4): alle Buchungen, Filter + Summen.
+                        <span class="cov0" title="0">r.Get("/admin/zeit", s.handleAdminListZeit)
+
+                        // Urlaubsanträge — Admin (Phase 5): Liste (Filter) + Entscheidung.
+                        r.Route("/admin/urlaub", func(r chi.Router) </span><span class="cov0" title="0">{
+                                r.Get("/", s.handleAdminListUrlaub)
+                                r.Patch("/{id}", s.handleDecideUrlaub)
+                        }</span>)
+
+                        // Überstunden — Admin (Phase 6): Saldo aller (oder ?arbeiter=) je Monat.
+                        <span class="cov0" title="0">r.Get("/admin/ueberstunden", s.handleAdminUeberstunden)
+
+                        // PDF &amp; Dokumente — Admin (Phase 7).
+                        r.Get("/admin/berichte/monat", s.handleMonatsbericht)
+                        r.Post("/admin/dokumente", s.handleUploadDokument)
+                        r.Get("/admin/dokumente", s.handleAdminListDokument)</span>
+                })
+        })
+
+        <span class="cov0" title="0">return r</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">// Package server wires the HTTP router, middleware and handlers.
+package server
+
+import (
+        "crypto/rand"
+        "encoding/hex"
+        "log/slog"
+        "net/http"
+        "reflect"
+        "strings"
+
+        "github.com/go-playground/validator/v10"
+        "github.com/jackc/pgx/v5/pgxpool"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/auth"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/config"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/storage"
+)
+
+// Server holds shared dependencies for HTTP handlers.
+type Server struct {
+        cfg       config.Config
+        log       *slog.Logger
+        pool      *pgxpool.Pool
+        queries   *db.Queries
+        hasher    auth.Hasher
+        issuer    *auth.TokenIssuer
+        validate  *validator.Validate
+        store     storage.Storage
+        dummyHash string // bcrypt hash for timing-safe login (anti-enumeration)
+}
+
+// New builds the fully wired http.Handler (router + middleware + routes).
+// Returns an error if the auth issuer can't be constructed (e.g. weak JWT secret).
+func New(cfg config.Config, log *slog.Logger, pool *pgxpool.Pool) (http.Handler, error) <span class="cov0" title="0">{
+        issuer, err := auth.NewTokenIssuer(cfg.JWTSecret, cfg.AccessTokenTTL)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">hasher := auth.NewHasher(cfg.BcryptCost)
+
+        // Precompute a dummy bcrypt hash so an unknown-email login still spends a
+        // bcrypt compare — keeps login timing constant (no user enumeration).
+        seed := make([]byte, 16)
+        if _, err := rand.Read(seed); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">dummyHash, err := hasher.Hash(hex.EncodeToString(seed))
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // Validator: report errors using the json field name (e.g. "wochenstunden").
+        <span class="cov0" title="0">v := validator.New(validator.WithRequiredStructEnabled())
+        v.RegisterTagNameFunc(func(fld reflect.StructField) string </span><span class="cov0" title="0">{
+                name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+                if name == "-" </span><span class="cov0" title="0">{
+                        return ""
+                }</span>
+                <span class="cov0" title="0">return name</span>
+        })
+
+        <span class="cov0" title="0">store, err := storage.NewLocal(cfg.DokumenteDir)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">s := &amp;Server{
+                cfg:       cfg,
+                log:       log,
+                pool:      pool,
+                queries:   db.New(pool),
+                hasher:    hasher,
+                issuer:    issuer,
+                validate:  v,
+                store:     store,
+                dummyHash: dummyHash,
+        }
+        return s.routes(), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package server
+
+import (
+        "errors"
+        "math"
+        "net/http"
+        "strconv"
+        "time"
+
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+type ueberstundenResponse struct {
+        ArbeiterID      uuid.UUID `json:"arbeiter_id"`
+        Name            string    `json:"name,omitempty"`
+        Jahr            int       `json:"jahr"`
+        Monat           int       `json:"monat"`
+        Werktage        int       `json:"werktage"`
+        UrlaubKrankTage int       `json:"urlaub_krank_tage"`
+        SollMinuten     int64     `json:"soll_minuten"`
+        IstMinuten      int64     `json:"ist_minuten"`
+        SaldoMinuten    int64     `json:"saldo_minuten"`
+}
+
+// monthBounds returns [start, end) of the given month in UTC.
+func monthBounds(jahr, monat int) (start, end time.Time) <span class="cov3" title="4">{
+        start = time.Date(jahr, time.Month(monat), 1, 0, 0, 0, 0, time.UTC)
+        return start, start.AddDate(0, 1, 0)
+}</span>
+
+// countWeekdays counts Mon–Fri days in [start, end). Public holidays are NOT
+// excluded (§13 "Feiertage später").
+func countWeekdays(start, end time.Time) int <span class="cov4" title="7">{
+        n := 0
+        for d := start; d.Before(end); d = d.AddDate(0, 0, 1) </span><span class="cov10" title="103">{
+                if wd := d.Weekday(); wd != time.Saturday &amp;&amp; wd != time.Sunday </span><span class="cov9" title="72">{
+                        n++
+                }</span>
+        }
+        <span class="cov4" title="7">return n</span>
+}
+
+// creditedWorkdays counts distinct Mon–Fri days within [start, end) covered by the
+// approved-leave rows (one arbeiter). bis_datum is inclusive. Overlapping requests
+// do not double-count.
+func creditedWorkdays(rows []db.ListGenehmigteAbwesenheitRow, start, end time.Time) int <span class="cov5" title="8">{
+        covered := make(map[string]struct{})
+        for _, row := range rows </span><span class="cov4" title="7">{
+                from := row.VonDatum.UTC()
+                if from.Before(start) </span><span class="cov1" title="1">{
+                        from = start
+                }</span>
+                <span class="cov4" title="7">to := row.BisDatum.UTC()
+                for d := from; !d.After(to) &amp;&amp; d.Before(end); d = d.AddDate(0, 0, 1) </span><span class="cov7" title="23">{
+                        if wd := d.Weekday(); wd != time.Saturday &amp;&amp; wd != time.Sunday </span><span class="cov6" title="20">{
+                                covered[d.Format(dateFormat)] = struct{}{}
+                        }</span>
+                }
+        }
+        <span class="cov5" title="8">return len(covered)</span>
+}
+
+// sollMinuten = (wochenstunden/5)*60 * effektiveWerktage, rounded to whole minutes.
+func sollMinuten(wochenstunden string, effektiveWerktage int) int64 <span class="cov4" title="7">{
+        wh, err := strconv.ParseFloat(wochenstunden, 64)
+        if err != nil </span><span class="cov2" title="2">{
+                wh = 0
+        }</span>
+        <span class="cov4" title="7">return int64(math.Round(wh / 5.0 * 60.0 * float64(effektiveWerktage)))</span>
+}
+
+// parseMonat reads ?jahr=&amp;monat=; defaults to the current month if both absent.
+func parseMonat(w http.ResponseWriter, r *http.Request) (jahr, monat int, ok bool) <span class="cov5" title="12">{
+        js, ms := r.URL.Query().Get("jahr"), r.URL.Query().Get("monat")
+        if js == "" &amp;&amp; ms == "" </span><span class="cov1" title="1">{
+                now := time.Now().UTC()
+                return now.Year(), int(now.Month()), true
+        }</span>
+        <span class="cov5" title="11">if js == "" || ms == "" </span><span class="cov2" title="2">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "jahr und monat zusammen angeben.")
+                return 0, 0, false
+        }</span>
+        <span class="cov5" title="9">jahr, err := strconv.Atoi(js)
+        if err != nil || jahr &lt; 2000 || jahr &gt; 2100 </span><span class="cov3" title="3">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiges jahr.")
+                return 0, 0, false
+        }</span>
+        <span class="cov4" title="6">monat, err = strconv.Atoi(ms)
+        if err != nil || monat &lt; 1 || monat &gt; 12 </span><span class="cov3" title="3">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiger monat (1-12).")
+                return 0, 0, false
+        }</span>
+        <span class="cov3" title="3">return jahr, monat, true</span>
+}
+
+// computeUeberstunden assembles the balance for one arbeiter/month.
+func computeUeberstunden(id uuid.UUID, name string, jahr, monat int, start, end time.Time,
+        wochenstunden string, ist int64, abw []db.ListGenehmigteAbwesenheitRow) ueberstundenResponse <span class="cov2" title="2">{
+        werktage := countWeekdays(start, end)
+        credited := creditedWorkdays(abw, start, end)
+        effektiv := werktage - credited
+        if effektiv &lt; 0 </span><span class="cov0" title="0">{
+                effektiv = 0
+        }</span>
+        <span class="cov2" title="2">soll := sollMinuten(wochenstunden, effektiv)
+        return ueberstundenResponse{
+                ArbeiterID:      id,
+                Name:            name,
+                Jahr:            jahr,
+                Monat:           monat,
+                Werktage:        werktage,
+                UrlaubKrankTage: credited,
+                SollMinuten:     soll,
+                IstMinuten:      ist,
+                SaldoMinuten:    ist - soll,
+        }</span>
+}
+
+// handleOwnUeberstunden returns the authenticated worker's balance for a month.
+func (s *Server) handleOwnUeberstunden(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        jahr, monat, ok := parseMonat(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">start, end := monthBounds(jahr, monat)
+
+        a, err := s.queries.GetArbeiterByID(r.Context(), ident.ArbeiterID)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">ist, err := s.queries.AdminSumZeitbuchung(r.Context(), db.AdminSumZeitbuchungParams{
+                ArbeiterID: &amp;ident.ArbeiterID, Von: &amp;start, Bis: &amp;end,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">lastDay := end.AddDate(0, 0, -1)
+        abw, err := s.queries.ListGenehmigteAbwesenheit(r.Context(), db.ListGenehmigteAbwesenheitParams{
+                Von: start, Bis: lastDay, ArbeiterID: &amp;ident.ArbeiterID,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK,
+                computeUeberstunden(a.ID, "", jahr, monat, start, end, a.Wochenstunden, ist.SummeMinuten, abw))</span>
+}
+
+// handleAdminUeberstunden returns balances for all active workers (or one via ?arbeiter=).
+func (s *Server) handleAdminUeberstunden(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        jahr, monat, ok := parseMonat(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">arbeiterFilter, ok := parseOptionalUUIDQuery(w, r, "arbeiter")
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">start, end := monthBounds(jahr, monat)
+        lastDay := end.AddDate(0, 0, -1)
+
+        var arbeiterListe []db.Arbeiter
+        if arbeiterFilter != nil </span><span class="cov0" title="0">{
+                a, err := s.queries.GetArbeiterByID(r.Context(), *arbeiterFilter)
+                if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusNotFound, "not_found", "Arbeiter nicht gefunden.")
+                        return
+                }</span>
+                <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                        s.serverError(w, r, err)
+                        return
+                }</span>
+                <span class="cov0" title="0">arbeiterListe = []db.Arbeiter{a}</span>
+        } else<span class="cov0" title="0"> {
+                aktiv := true
+                rows, err := s.queries.ListArbeiter(r.Context(), &amp;aktiv)
+                if err != nil </span><span class="cov0" title="0">{
+                        s.serverError(w, r, err)
+                        return
+                }</span>
+                <span class="cov0" title="0">arbeiterListe = rows</span>
+        }
+
+        <span class="cov0" title="0">perZeit, err := s.queries.AdminSumZeitbuchungPerArbeiter(r.Context(), db.AdminSumZeitbuchungPerArbeiterParams{
+                ArbeiterID: arbeiterFilter, Von: &amp;start, Bis: &amp;end,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">istMap := make(map[uuid.UUID]int64, len(perZeit))
+        for _, p := range perZeit </span><span class="cov0" title="0">{
+                istMap[p.ArbeiterID] = p.SummeMinuten
+        }</span>
+
+        <span class="cov0" title="0">abw, err := s.queries.ListGenehmigteAbwesenheit(r.Context(), db.ListGenehmigteAbwesenheitParams{
+                Von: start, Bis: lastDay, ArbeiterID: arbeiterFilter,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">abwMap := make(map[uuid.UUID][]db.ListGenehmigteAbwesenheitRow)
+        for _, row := range abw </span><span class="cov0" title="0">{
+                abwMap[row.ArbeiterID] = append(abwMap[row.ArbeiterID], row)
+        }</span>
+
+        <span class="cov0" title="0">out := make([]ueberstundenResponse, 0, len(arbeiterListe))
+        for _, a := range arbeiterListe </span><span class="cov0" title="0">{
+                out = append(out, computeUeberstunden(a.ID, a.Name, jahr, monat, start, end,
+                        a.Wochenstunden, istMap[a.ID], abwMap[a.ID]))
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, out)</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package server
+
+import (
+        "errors"
+        "net/http"
+        "time"
+
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+const dateFormat = "2006-01-02"
+
+// --- DTOs -------------------------------------------------------------------
+
+type urlaubsantragResponse struct {
+        ID             uuid.UUID  `json:"id"`
+        ArbeiterID     uuid.UUID  `json:"arbeiter_id"`
+        VonDatum       string     `json:"von_datum"`
+        BisDatum       string     `json:"bis_datum"`
+        Typ            string     `json:"typ"`
+        Status         string     `json:"status"`
+        Grund          string     `json:"grund"`
+        EntschiedenVon *uuid.UUID `json:"entschieden_von"`
+        EntschiedenAm  *string    `json:"entschieden_am"`
+        CreatedAt      string     `json:"created_at"`
+}
+
+func toUrlaubResponse(u db.Urlaubsantrag) urlaubsantragResponse <span class="cov0" title="0">{
+        resp := urlaubsantragResponse{
+                ID:             u.ID,
+                ArbeiterID:     u.ArbeiterID,
+                VonDatum:       u.VonDatum.Format(dateFormat),
+                BisDatum:       u.BisDatum.Format(dateFormat),
+                Typ:            u.Typ,
+                Status:         u.Status,
+                Grund:          u.Grund,
+                EntschiedenVon: u.EntschiedenVon,
+                CreatedAt:      u.CreatedAt.UTC().Format(timeFormat),
+        }
+        if u.EntschiedenAm != nil </span><span class="cov0" title="0">{
+                s := u.EntschiedenAm.UTC().Format(timeFormat)
+                resp.EntschiedenAm = &amp;s
+        }</span>
+        <span class="cov0" title="0">return resp</span>
+}
+
+type createUrlaubRequest struct {
+        VonDatum string `json:"von_datum" validate:"required,datetime=2006-01-02"`
+        BisDatum string `json:"bis_datum" validate:"required,datetime=2006-01-02"`
+        Typ      string `json:"typ"       validate:"omitempty,oneof=urlaub krankheit sonstige"`
+        Grund    string `json:"grund"     validate:"omitempty,max=1000"`
+}
+
+type decideUrlaubRequest struct {
+        Status string `json:"status" validate:"required,oneof=genehmigt abgelehnt"`
+}
+
+// parseDatumRange reads optional ?von=&amp;bis= date-only (YYYY-MM-DD) query params.
+func parseDatumRange(w http.ResponseWriter, r *http.Request) (von, bis *time.Time, ok bool) <span class="cov0" title="0">{
+        parse := func(name string) (*time.Time, bool) </span><span class="cov0" title="0">{
+                raw := r.URL.Query().Get(name)
+                if raw == "" </span><span class="cov0" title="0">{
+                        return nil, true
+                }</span>
+                <span class="cov0" title="0">t, err := time.Parse(dateFormat, raw)
+                if err != nil </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiges "+name+"-Datum (JJJJ-MM-TT).")
+                        return nil, false
+                }</span>
+                <span class="cov0" title="0">return &amp;t, true</span>
+        }
+        <span class="cov0" title="0">von, ok = parse("von")
+        if !ok </span><span class="cov0" title="0">{
+                return nil, nil, false
+        }</span>
+        <span class="cov0" title="0">bis, ok = parse("bis")
+        if !ok </span><span class="cov0" title="0">{
+                return nil, nil, false
+        }</span>
+        <span class="cov0" title="0">return von, bis, true</span>
+}
+
+// --- Worker handlers (requireAuth, scoped to identity.ArbeiterID) -----------
+
+func (s *Server) handleCreateUrlaub(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        var req createUrlaubRequest
+        if !s.decodeAndValidate(w, r, &amp;req) </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">von, err := time.Parse(dateFormat, req.VonDatum)
+        if err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiges von_datum.")
+                return
+        }</span>
+        <span class="cov0" title="0">bis, err := time.Parse(dateFormat, req.BisDatum)
+        if err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiges bis_datum.")
+                return
+        }</span>
+        <span class="cov0" title="0">if bis.Before(von) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "bis_datum darf nicht vor von_datum liegen.")
+                return
+        }</span>
+        <span class="cov0" title="0">typ := req.Typ
+        if typ == "" </span><span class="cov0" title="0">{
+                typ = "urlaub"
+        }</span>
+        <span class="cov0" title="0">id, err := uuid.NewV7()
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">u, err := s.queries.CreateUrlaubsantrag(r.Context(), db.CreateUrlaubsantragParams{
+                ID:         id,
+                ArbeiterID: ident.ArbeiterID,
+                VonDatum:   von,
+                BisDatum:   bis,
+                Typ:        typ,
+                Grund:      req.Grund,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusCreated, toUrlaubResponse(u))</span>
+}
+
+func (s *Server) handleListOwnUrlaub(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        rows, err := s.queries.ListOwnUrlaubsantrag(r.Context(), ident.ArbeiterID)
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">out := make([]urlaubsantragResponse, 0, len(rows))
+        for _, u := range rows </span><span class="cov0" title="0">{
+                out = append(out, toUrlaubResponse(u))
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, out)</span>
+}
+
+func (s *Server) handleDeleteUrlaub(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">u, err := s.queries.GetUrlaubsantragByIDForArbeiter(r.Context(), db.GetUrlaubsantragByIDForArbeiterParams{
+                ID:         id,
+                ArbeiterID: ident.ArbeiterID,
+        })
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Antrag nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">if u.Status != "offen" </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusConflict, "not_offen", "Nur offene Anträge können gelöscht werden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err := s.queries.DeleteUrlaubsantrag(r.Context(), db.DeleteUrlaubsantragParams{
+                ID:         id,
+                ArbeiterID: ident.ArbeiterID,
+        }); err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">w.WriteHeader(http.StatusNoContent)</span>
+}
+
+// --- Admin handlers (requireAuth + requireAdmin) ----------------------------
+
+func (s *Server) handleAdminListUrlaub(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var statusFilter *string
+        if raw := r.URL.Query().Get("status"); raw != "" </span><span class="cov0" title="0">{
+                if raw != "offen" &amp;&amp; raw != "genehmigt" &amp;&amp; raw != "abgelehnt" </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültiger Status-Filter.")
+                        return
+                }</span>
+                <span class="cov0" title="0">statusFilter = &amp;raw</span>
+        }
+        <span class="cov0" title="0">von, bis, ok := parseDatumRange(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">rows, err := s.queries.AdminListUrlaubsantrag(r.Context(), db.AdminListUrlaubsantragParams{
+                Status: statusFilter,
+                Von:    von,
+                Bis:    bis,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">out := make([]urlaubsantragResponse, 0, len(rows))
+        for _, u := range rows </span><span class="cov0" title="0">{
+                out = append(out, toUrlaubResponse(u))
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, out)</span>
+}
+
+func (s *Server) handleDecideUrlaub(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">var req decideUrlaubRequest
+        if !s.decodeAndValidate(w, r, &amp;req) </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">cur, err := s.queries.GetUrlaubsantragByID(r.Context(), id)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Antrag nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">if cur.Status != "offen" </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusConflict, "already_decided", "Antrag wurde bereits entschieden.")
+                return
+        }</span>
+        <span class="cov0" title="0">u, err := s.queries.DecideUrlaubsantrag(r.Context(), db.DecideUrlaubsantragParams{
+                Status:         req.Status,
+                EntschiedenVon: ident.ArbeiterID,
+                ID:             id,
+        })
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{ // race: decided between get and update
+                platform.WriteError(w, http.StatusConflict, "already_decided", "Antrag wurde bereits entschieden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toUrlaubResponse(u))</span>
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package server
+
+import (
+        "encoding/json"
+        "errors"
+        "net/http"
+        "strings"
+
+        "github.com/go-playground/validator/v10"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+// decodeAndValidate decodes the JSON body into dst and runs struct validation.
+// On any failure it writes a 400 (central envelope) and returns false; the caller
+// then simply returns. DisallowUnknownFields surfaces typo'd keys immediately.
+func (s *Server) decodeAndValidate(w http.ResponseWriter, r *http.Request, dst any) bool <span class="cov0" title="0">{
+        dec := json.NewDecoder(r.Body)
+        dec.DisallowUnknownFields()
+        if err := dec.Decode(dst); err != nil </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Ungültige Anfrage (JSON).")
+                return false
+        }</span>
+        <span class="cov0" title="0">if err := s.validate.Struct(dst); err != nil </span><span class="cov0" title="0">{
+                var ve validator.ValidationErrors
+                if errors.As(err, &amp;ve) </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusBadRequest, "validation_error", validationMessage(ve))
+                        return false
+                }</span>
+                <span class="cov0" title="0">s.serverError(w, r, err) // non-ValidationErrors =&gt; programmer error
+                return false</span>
+        }
+        <span class="cov0" title="0">return true</span>
+}
+
+// validationMessage renders a compact, German, field-aware message.
+func validationMessage(ve validator.ValidationErrors) string <span class="cov0" title="0">{
+        parts := make([]string, 0, len(ve))
+        for _, fe := range ve </span><span class="cov0" title="0">{
+                parts = append(parts, fieldRule(fe.Field(), fe.Tag(), fe.Param()))
+        }</span>
+        <span class="cov0" title="0">return "Validierungsfehler: " + strings.Join(parts, "; ")</span>
+}
+
+func fieldRule(field, tag, param string) string <span class="cov0" title="0">{
+        switch tag </span>{
+        case "required":<span class="cov0" title="0">
+                return field + " ist erforderlich"</span>
+        case "email":<span class="cov0" title="0">
+                return field + " muss eine gültige E-Mail sein"</span>
+        case "min":<span class="cov0" title="0">
+                return field + " ist zu kurz (min " + param + ")"</span>
+        case "max":<span class="cov0" title="0">
+                return field + " ist zu lang (max " + param + ")"</span>
+        case "numeric":<span class="cov0" title="0">
+                return field + " muss numerisch sein"</span>
+        case "oneof":<span class="cov0" title="0">
+                return field + " muss einer von [" + param + "] sein"</span>
+        case "datetime":<span class="cov0" title="0">
+                return field + " muss ein gültiges Datum (JJJJ-MM-TT) sein"</span>
+        default:<span class="cov0" title="0">
+                return field + " ist ungültig (" + tag + ")"</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package server
+
+import (
+        "errors"
+        "net/http"
+        "time"
+
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5"
+
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/db"
+        "github.com/lindritP/prekaj-zeiterfassung/backend/internal/platform"
+)
+
+// statutoryPause returns the legally-mandated break (minutes) for a worked span,
+// per Austrian Arbeitszeitgesetz §11: a span over 6h (360 min) requires at least a
+// 30-min break. Single source of truth — extend here for collective-agreement tiers.
+func statutoryPause(spanMin int32) int32 <span class="cov0" title="0">{
+        if spanMin &gt; 360 </span><span class="cov0" title="0">{
+                return 30
+        }</span>
+        <span class="cov0" title="0">return 0</span>
+}
+
+// dauerMinuten = (end - start) truncated to whole minutes, minus pause; clamped &gt;= 0.
+// No rounding to 5/15 (CLAUDE.md §13 default).
+func dauerMinuten(start, end time.Time, pause int32) int32 <span class="cov0" title="0">{
+        d := int32(end.Sub(start).Minutes()) - pause
+        if d &lt; 0 </span><span class="cov0" title="0">{
+                return 0
+        }</span>
+        <span class="cov0" title="0">return d</span>
+}
+
+// validateSpan enforces end&gt;start and pause&lt;=span. On violation it writes a 400 and
+// returns false. Over-midnight is a non-issue: UTC timestamps make a booking across
+// midnight just end&gt;start.
+func validateSpan(w http.ResponseWriter, start, end time.Time, pause int32) bool <span class="cov0" title="0">{
+        if !end.After(start) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "end_zeit muss nach start_zeit liegen.")
+                return false
+        }</span>
+        <span class="cov0" title="0">if pause &gt; int32(end.Sub(start).Minutes()) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Pause überschreitet die Arbeitszeit.")
+                return false
+        }</span>
+        <span class="cov0" title="0">return true</span>
+}
+
+func normTime(p *time.Time) *time.Time <span class="cov0" title="0">{
+        if p == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">u := p.UTC()
+        return &amp;u</span>
+}
+
+// --- DTOs -------------------------------------------------------------------
+
+type zeitbuchungResponse struct {
+        ID           uuid.UUID  `json:"id"`
+        ArbeiterID   uuid.UUID  `json:"arbeiter_id"`
+        BaustelleID  *uuid.UUID `json:"baustelle_id"`
+        StartZeit    string     `json:"start_zeit"`
+        EndZeit      *string    `json:"end_zeit"`
+        PauseMinuten int32      `json:"pause_minuten"`
+        DauerMinuten *int32     `json:"dauer_minuten"`
+        Notiz        string     `json:"notiz"`
+        CreatedAt    string     `json:"created_at"`
+        UpdatedAt    string     `json:"updated_at"`
+}
+
+func toZeitbuchungResponse(z db.Zeitbuchung) zeitbuchungResponse <span class="cov0" title="0">{
+        resp := zeitbuchungResponse{
+                ID:           z.ID,
+                ArbeiterID:   z.ArbeiterID,
+                BaustelleID:  z.BaustelleID,
+                StartZeit:    z.StartZeit.UTC().Format(timeFormat),
+                PauseMinuten: z.PauseMinuten,
+                Notiz:        z.Notiz,
+                CreatedAt:    z.CreatedAt.UTC().Format(timeFormat),
+                UpdatedAt:    z.UpdatedAt.UTC().Format(timeFormat),
+        }
+        if z.EndZeit != nil </span><span class="cov0" title="0">{
+                end := z.EndZeit.UTC().Format(timeFormat)
+                resp.EndZeit = &amp;end
+                d := dauerMinuten(z.StartZeit, *z.EndZeit, z.PauseMinuten)
+                resp.DauerMinuten = &amp;d
+        }</span>
+        <span class="cov0" title="0">return resp</span>
+}
+
+type startZeitRequest struct {
+        BaustelleID *uuid.UUID `json:"baustelle_id"`
+        StartZeit   *time.Time `json:"start_zeit"` // RFC3339; absent =&gt; server now()
+        Notiz       string     `json:"notiz" validate:"omitempty,max=1000"`
+}
+
+type stopZeitRequest struct {
+        EndZeit *time.Time `json:"end_zeit"` // RFC3339; absent =&gt; server now()
+}
+
+type updateZeitRequest struct {
+        BaustelleID  *uuid.UUID `json:"baustelle_id"`
+        StartZeit    *time.Time `json:"start_zeit"`
+        EndZeit      *time.Time `json:"end_zeit"`
+        PauseMinuten *int32     `json:"pause_minuten" validate:"omitempty,min=0"` // explicit override
+        Notiz        *string    `json:"notiz" validate:"omitempty,max=1000"`
+}
+
+type adminZeitArbeiterSumme struct {
+        ArbeiterID   uuid.UUID `json:"arbeiter_id"`
+        SummeMinuten int64     `json:"summe_minuten"`
+        Anzahl       int64     `json:"anzahl"`
+}
+
+type adminZeitListResponse struct {
+        Buchungen    []zeitbuchungResponse    `json:"buchungen"`
+        SummeMinuten int64                    `json:"summe_minuten"`
+        Anzahl       int64                    `json:"anzahl"`
+        ProArbeiter  []adminZeitArbeiterSumme `json:"pro_arbeiter"`
+}
+
+// --- Worker handlers (requireAuth, scoped to identity.ArbeiterID) -----------
+
+func (s *Server) handleStartZeit(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        var req startZeitRequest
+        if !s.decodeAndValidate(w, r, &amp;req) </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">start := time.Now().UTC()
+        if req.StartZeit != nil </span><span class="cov0" title="0">{
+                start = req.StartZeit.UTC()
+                if start.After(time.Now().UTC()) </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusBadRequest, "bad_request", "start_zeit darf nicht in der Zukunft liegen.")
+                        return
+                }</span>
+        }
+
+        <span class="cov0" title="0">id, err := uuid.NewV7()
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">z, err := s.queries.StartZeitbuchung(r.Context(), db.StartZeitbuchungParams{
+                ID:          id,
+                ArbeiterID:  ident.ArbeiterID,
+                BaustelleID: req.BaustelleID,
+                StartZeit:   start,
+                Notiz:       req.Notiz,
+        })
+        if isUniqueViolation(err) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusConflict, "running_exists", "Es läuft bereits eine Zeitbuchung.")
+                return
+        }</span>
+        <span class="cov0" title="0">if isForeignKeyViolation(err) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Unbekannte Baustelle.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusCreated, toZeitbuchungResponse(z))</span>
+}
+
+func (s *Server) handleStopZeit(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        var req stopZeitRequest
+        if !s.decodeAndValidate(w, r, &amp;req) </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">running, err := s.queries.GetRunningForArbeiter(r.Context(), ident.ArbeiterID)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusConflict, "no_running", "Keine laufende Buchung.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">end := time.Now().UTC()
+        if req.EndZeit != nil </span><span class="cov0" title="0">{
+                end = req.EndZeit.UTC()
+        }</span>
+        <span class="cov0" title="0">if !end.After(running.StartZeit) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "end_zeit muss nach start_zeit liegen.")
+                return
+        }</span>
+        <span class="cov0" title="0">pause := statutoryPause(int32(end.Sub(running.StartZeit).Minutes()))
+
+        z, err := s.queries.StopZeitbuchung(r.Context(), db.StopZeitbuchungParams{
+                EndZeit:      end,
+                PauseMinuten: pause,
+                ArbeiterID:   ident.ArbeiterID,
+        })
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{ // lost the race: another stop won
+                platform.WriteError(w, http.StatusConflict, "no_running", "Keine laufende Buchung.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toZeitbuchungResponse(z))</span>
+}
+
+func (s *Server) handleGetLaufend(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        z, err := s.queries.GetRunningForArbeiter(r.Context(), ident.ArbeiterID)
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteJSON(w, http.StatusOK, nil) // nichts läuft
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toZeitbuchungResponse(z))</span>
+}
+
+func (s *Server) handleListOwnZeit(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        von, bis, ok := parseZeitraum(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">rows, err := s.queries.ListOwnZeitbuchung(r.Context(), db.ListOwnZeitbuchungParams{
+                ArbeiterID: ident.ArbeiterID,
+                Von:        von,
+                Bis:        bis,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">out := make([]zeitbuchungResponse, 0, len(rows))
+        for _, z := range rows </span><span class="cov0" title="0">{
+                out = append(out, toZeitbuchungResponse(z))
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, out)</span>
+}
+
+func (s *Server) handlePatchZeit(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        ident, _ := identityFrom(r.Context())
+        id, ok := parseIDParam(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">var req updateZeitRequest
+        if !s.decodeAndValidate(w, r, &amp;req) </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">cur, err := s.queries.GetZeitbuchungByIDForArbeiter(r.Context(), db.GetZeitbuchungByIDForArbeiterParams{
+                ID:         id,
+                ArbeiterID: ident.ArbeiterID,
+        })
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Zeitbuchung nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+
+        // Effective start/end after the patch.
+        <span class="cov0" title="0">start := cur.StartZeit
+        if req.StartZeit != nil </span><span class="cov0" title="0">{
+                start = req.StartZeit.UTC()
+        }</span>
+        <span class="cov0" title="0">end := cur.EndZeit
+        if req.EndZeit != nil </span><span class="cov0" title="0">{
+                e := req.EndZeit.UTC()
+                end = &amp;e
+        }</span>
+
+        // Resolve pause: explicit override wins; else recompute statutory if the span
+        // changed on a completed booking; else leave unchanged.
+        <span class="cov0" title="0">var pausePtr *int32
+        switch </span>{
+        case req.PauseMinuten != nil:<span class="cov0" title="0">
+                if end != nil &amp;&amp; !validateSpan(w, start, *end, *req.PauseMinuten) </span><span class="cov0" title="0">{
+                        return
+                }</span>
+                <span class="cov0" title="0">pausePtr = req.PauseMinuten</span>
+        case end != nil &amp;&amp; (req.StartZeit != nil || req.EndZeit != nil):<span class="cov0" title="0">
+                if !end.After(start) </span><span class="cov0" title="0">{
+                        platform.WriteError(w, http.StatusBadRequest, "bad_request", "end_zeit muss nach start_zeit liegen.")
+                        return
+                }</span>
+                <span class="cov0" title="0">p := statutoryPause(int32(end.Sub(start).Minutes()))
+                pausePtr = &amp;p</span>
+        }
+
+        <span class="cov0" title="0">z, err := s.queries.UpdateZeitbuchung(r.Context(), db.UpdateZeitbuchungParams{
+                ID:           id,
+                ArbeiterID:   ident.ArbeiterID,
+                StartZeit:    normTime(req.StartZeit),
+                EndZeit:      normTime(req.EndZeit),
+                BaustelleID:  req.BaustelleID,
+                PauseMinuten: pausePtr,
+                Notiz:        req.Notiz,
+        })
+        if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusNotFound, "not_found", "Zeitbuchung nicht gefunden.")
+                return
+        }</span>
+        <span class="cov0" title="0">if isForeignKeyViolation(err) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusBadRequest, "bad_request", "Unbekannte Baustelle.")
+                return
+        }</span>
+        <span class="cov0" title="0">if isUniqueViolation(err) </span><span class="cov0" title="0">{
+                platform.WriteError(w, http.StatusConflict, "running_exists", "Es läuft bereits eine Zeitbuchung.")
+                return
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, toZeitbuchungResponse(z))</span>
+}
+
+// --- Admin handler (requireAuth + requireAdmin) -----------------------------
+
+func (s *Server) handleAdminListZeit(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        arbeiterID, ok := parseOptionalUUIDQuery(w, r, "arbeiter")
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">baustelleID, ok := parseOptionalUUIDQuery(w, r, "baustelle")
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">von, bis, ok := parseZeitraum(w, r)
+        if !ok </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">rows, err := s.queries.AdminListZeitbuchung(r.Context(), db.AdminListZeitbuchungParams{
+                ArbeiterID:  arbeiterID,
+                BaustelleID: baustelleID,
+                Von:         von,
+                Bis:         bis,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">sum, err := s.queries.AdminSumZeitbuchung(r.Context(), db.AdminSumZeitbuchungParams{
+                ArbeiterID:  arbeiterID,
+                BaustelleID: baustelleID,
+                Von:         von,
+                Bis:         bis,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+        <span class="cov0" title="0">perArb, err := s.queries.AdminSumZeitbuchungPerArbeiter(r.Context(), db.AdminSumZeitbuchungPerArbeiterParams{
+                ArbeiterID:  arbeiterID,
+                BaustelleID: baustelleID,
+                Von:         von,
+                Bis:         bis,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                s.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">buchungen := make([]zeitbuchungResponse, 0, len(rows))
+        for _, z := range rows </span><span class="cov0" title="0">{
+                buchungen = append(buchungen, toZeitbuchungResponse(z))
+        }</span>
+        <span class="cov0" title="0">pro := make([]adminZeitArbeiterSumme, 0, len(perArb))
+        for _, p := range perArb </span><span class="cov0" title="0">{
+                pro = append(pro, adminZeitArbeiterSumme{ArbeiterID: p.ArbeiterID, SummeMinuten: p.SummeMinuten, Anzahl: p.Anzahl})
+        }</span>
+        <span class="cov0" title="0">platform.WriteJSON(w, http.StatusOK, adminZeitListResponse{
+                Buchungen:    buchungen,
+                SummeMinuten: sum.SummeMinuten,
+                Anzahl:       sum.Anzahl,
+                ProArbeiter:  pro,
+        })</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
