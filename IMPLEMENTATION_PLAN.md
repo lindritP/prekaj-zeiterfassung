@@ -73,13 +73,14 @@
 
 **Ziel:** Admin kann Mitarbeiter und Baustellen verwalten.
 
-- [ ] Migration `baustelle`: `id`, `name`, `adresse`, `aktiv`, `created_at`, `updated_at`.
-- [ ] sqlc-Queries: list/get/create/update/deactivate für `arbeiter` und `baustelle`.
-- [ ] Endpunkte **Arbeiter (Admin):** `GET/POST /api/v1/arbeiter`, `GET/PATCH /arbeiter/{id}`, Deaktivieren (kein Hard-Delete).
-- [ ] Endpunkte **Baustellen (Admin):** `GET/POST /api/v1/baustellen`, `GET/PATCH /baustellen/{id}`, Deaktivieren.
-- [ ] Validierung der DTOs (`validator`); Eindeutigkeit E-Mail.
+- [x] Migration `baustelle` (`000003`): `id` (uuid v7), `name`, `adresse` (NOT NULL DEFAULT ''), `aktiv`, `created_at`, `updated_at`.
+- [x] sqlc-Queries: list (aktiv-Filter)/get/create/update (COALESCE partial)/deactivate für `arbeiter` und `baustelle`.
+- [x] Endpunkte **Arbeiter (Admin):** `GET/POST /api/v1/arbeiter`, `GET/PATCH/DELETE /arbeiter/{id}` (DELETE = soft-deactivate, kein Hard-Delete; Reaktivierung via `PATCH aktiv:true`). Passwort: Admin vergibt initiales `passwort`. Geld/Stunden als JSON-String.
+- [x] Endpunkte **Baustellen (Admin):** `GET/POST /api/v1/baustellen`, `GET/PATCH/DELETE /baustellen/{id}`.
+- [x] Validierung der DTOs (`go-playground/validator/v10`, JSON-Feldnamen in Fehlern); E-Mail-Eindeutigkeit (citext UNIQUE → 409). `passwort_hash` wird nie serialisiert.
+- [x] Temporäre `/admin/ping`-Probe entfernt; Routen hinter `requireAuth + requireAdmin`.
 
-**DoD:** Admin legt Arbeiter & Baustelle an, bearbeitet und deaktiviert sie via API.
+**DoD:** ✅ Admin legt Arbeiter & Baustelle an, bearbeitet und deaktiviert sie via API. Verifiziert: 201/200, Liste + `?aktiv=`-Filter, 409 (dup E-Mail), 400 (Validierung/unknown field/oneof), 403 (Arbeiter), 404/400 (id), 401 (kein Token). `make check` clean. *(Offen für Phase 13: Last-Admin-Lockout-Schutz.)*
 
 ---
 

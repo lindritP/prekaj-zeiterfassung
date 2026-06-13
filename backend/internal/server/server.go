@@ -6,7 +6,10 @@ import (
 	"encoding/hex"
 	"log/slog"
 	"net/http"
+	"reflect"
+	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lindritP/prekaj-zeiterfassung/backend/internal/auth"
@@ -22,6 +25,7 @@ type Server struct {
 	queries   *db.Queries
 	hasher    auth.Hasher
 	issuer    *auth.TokenIssuer
+	validate  *validator.Validate
 	dummyHash string // bcrypt hash for timing-safe login (anti-enumeration)
 }
 
@@ -45,6 +49,16 @@ func New(cfg config.Config, log *slog.Logger, pool *pgxpool.Pool) (http.Handler,
 		return nil, err
 	}
 
+	// Validator: report errors using the json field name (e.g. "wochenstunden").
+	v := validator.New(validator.WithRequiredStructEnabled())
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
+
 	s := &Server{
 		cfg:       cfg,
 		log:       log,
@@ -52,6 +66,7 @@ func New(cfg config.Config, log *slog.Logger, pool *pgxpool.Pool) (http.Handler,
 		queries:   db.New(pool),
 		hasher:    hasher,
 		issuer:    issuer,
+		validate:  v,
 		dummyHash: dummyHash,
 	}
 	return s.routes(), nil

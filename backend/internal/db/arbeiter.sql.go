@@ -55,6 +55,32 @@ func (q *Queries) CreateArbeiter(ctx context.Context, arg CreateArbeiterParams) 
 	return i, err
 }
 
+const deactivateArbeiter = `-- name: DeactivateArbeiter :one
+UPDATE arbeiter
+   SET aktiv = false, updated_at = now()
+ WHERE id = $1
+RETURNING id, name, email, passwort_hash, rolle, wochenstunden, stundenlohn, aktiv, created_at, updated_at
+`
+
+// Soft-Delete: kein Hard-Delete (DSGVO-Löschung folgt in Phase 13). Idempotent.
+func (q *Queries) DeactivateArbeiter(ctx context.Context, id uuid.UUID) (Arbeiter, error) {
+	row := q.db.QueryRow(ctx, deactivateArbeiter, id)
+	var i Arbeiter
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswortHash,
+		&i.Rolle,
+		&i.Wochenstunden,
+		&i.Stundenlohn,
+		&i.Aktiv,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getArbeiterByEmail = `-- name: GetArbeiterByEmail :one
 SELECT id, name, email, passwort_hash, rolle, wochenstunden, stundenlohn, aktiv, created_at, updated_at FROM arbeiter WHERE email = $1
 `
@@ -83,6 +109,97 @@ SELECT id, name, email, passwort_hash, rolle, wochenstunden, stundenlohn, aktiv,
 
 func (q *Queries) GetArbeiterByID(ctx context.Context, id uuid.UUID) (Arbeiter, error) {
 	row := q.db.QueryRow(ctx, getArbeiterByID, id)
+	var i Arbeiter
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswortHash,
+		&i.Rolle,
+		&i.Wochenstunden,
+		&i.Stundenlohn,
+		&i.Aktiv,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listArbeiter = `-- name: ListArbeiter :many
+SELECT id, name, email, passwort_hash, rolle, wochenstunden, stundenlohn, aktiv, created_at, updated_at FROM arbeiter
+WHERE ($1::boolean IS NULL OR aktiv = $1::boolean)
+ORDER BY name ASC, created_at ASC
+`
+
+// Optionaler aktiv-Filter: NULL => alle. Sortierung nach Name.
+func (q *Queries) ListArbeiter(ctx context.Context, aktiv *bool) ([]Arbeiter, error) {
+	rows, err := q.db.Query(ctx, listArbeiter, aktiv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Arbeiter
+	for rows.Next() {
+		var i Arbeiter
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.PasswortHash,
+			&i.Rolle,
+			&i.Wochenstunden,
+			&i.Stundenlohn,
+			&i.Aktiv,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateArbeiter = `-- name: UpdateArbeiter :one
+UPDATE arbeiter
+   SET name          = COALESCE($1::text, name),
+       email         = COALESCE($2::text, email),
+       rolle         = COALESCE($3::text, rolle),
+       wochenstunden = COALESCE($4::numeric, wochenstunden),
+       stundenlohn   = COALESCE($5::numeric, stundenlohn),
+       passwort_hash = COALESCE($6::text, passwort_hash),
+       aktiv         = COALESCE($7::boolean, aktiv),
+       updated_at    = now()
+ WHERE id = $8
+RETURNING id, name, email, passwort_hash, rolle, wochenstunden, stundenlohn, aktiv, created_at, updated_at
+`
+
+type UpdateArbeiterParams struct {
+	Name          *string   `json:"name"`
+	Email         *string   `json:"email"`
+	Rolle         *string   `json:"rolle"`
+	Wochenstunden *string   `json:"wochenstunden"`
+	Stundenlohn   *string   `json:"stundenlohn"`
+	PasswortHash  *string   `json:"passwort_hash"`
+	Aktiv         *bool     `json:"aktiv"`
+	ID            uuid.UUID `json:"id"`
+}
+
+// Partial update (COALESCE). E-Mail wird im Handler normalisiert übergeben.
+func (q *Queries) UpdateArbeiter(ctx context.Context, arg UpdateArbeiterParams) (Arbeiter, error) {
+	row := q.db.QueryRow(ctx, updateArbeiter,
+		arg.Name,
+		arg.Email,
+		arg.Rolle,
+		arg.Wochenstunden,
+		arg.Stundenlohn,
+		arg.PasswortHash,
+		arg.Aktiv,
+		arg.ID,
+	)
 	var i Arbeiter
 	err := row.Scan(
 		&i.ID,

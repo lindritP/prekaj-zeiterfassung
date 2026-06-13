@@ -23,6 +23,15 @@ type Arbeiter struct {
 	UpdatedAt     time.Time `json:"updated_at"`
 }
 
+type Baustelle struct {
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Adresse   string    `json:"adresse"`
+	Aktiv     bool      `json:"aktiv"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type RefreshToken struct {
 	ID         uuid.UUID  `json:"id"`
 	ArbeiterID uuid.UUID  `json:"arbeiter_id"`

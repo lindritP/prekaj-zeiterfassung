@@ -52,10 +52,25 @@ func (s *Server) routes() http.Handler {
 			r.With(s.requireAuth).Get("/me", s.handleMe)
 		})
 
-		// TEMPORÄRE DoD-Probe für Phase 2 — entfällt, sobald Phase 3 echte
-		// Admin-Routen bringt.
-		r.With(s.requireAuth, s.requireAdmin).Get("/admin/ping", func(w http.ResponseWriter, _ *http.Request) {
-			platform.WriteJSON(w, http.StatusOK, map[string]string{"status": "admin-ok"})
+		// Admin-Stammdaten (Phase 3): alles hinter requireAuth + requireAdmin.
+		r.Group(func(r chi.Router) {
+			r.Use(s.requireAuth, s.requireAdmin)
+
+			r.Route("/arbeiter", func(r chi.Router) {
+				r.Get("/", s.handleListArbeiter)
+				r.Post("/", s.handleCreateArbeiter)
+				r.Get("/{id}", s.handleGetArbeiter)
+				r.Patch("/{id}", s.handlePatchArbeiter)
+				r.Delete("/{id}", s.handleDeactivateArbeiter)
+			})
+
+			r.Route("/baustellen", func(r chi.Router) {
+				r.Get("/", s.handleListBaustellen)
+				r.Post("/", s.handleCreateBaustelle)
+				r.Get("/{id}", s.handleGetBaustelle)
+				r.Patch("/{id}", s.handlePatchBaustelle)
+				r.Delete("/{id}", s.handleDeactivateBaustelle)
+			})
 		})
 	})
 
