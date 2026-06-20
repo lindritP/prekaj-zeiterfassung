@@ -1,0 +1,2564 @@
+{
+  "info": {
+    "name": "Prekaj-Zeiterfassung — A4 Zeiterfassung start/stop",
+    "description": "Spezifikationsbasierte Black-Box-Testfaelle (Aufgabe 4) fuer den Anwendungsfall 'Zeiterfassung starten/beenden'. Setup legt Testdaten an; DEF-01/DEF-02 schlagen bewusst fehl (gefundene Abweichungen).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('emailA')) pm.collectionVariables.set('emailA', 'wa-' + Date.now() + '-' + Math.floor(Math.random()*1e6) + '@test.local');",
+          "if (!pm.collectionVariables.get('emailB')) pm.collectionVariables.set('emailB', 'wb-' + Date.now() + '-' + Math.floor(Math.random()*1e6) + '@test.local');",
+          "if (!pm.collectionVariables.get('notiz1000')) pm.collectionVariables.set('notiz1000', 'x'.repeat(1000));",
+          "if (!pm.collectionVariables.get('notiz1001')) pm.collectionVariables.set('notiz1001', 'x'.repeat(1001));"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "tokenA",
+      "value": ""
+    },
+    {
+      "key": "tokenB",
+      "value": ""
+    },
+    {
+      "key": "baustelleId",
+      "value": ""
+    },
+    {
+      "key": "emailA",
+      "value": ""
+    },
+    {
+      "key": "emailB",
+      "value": ""
+    },
+    {
+      "key": "workerAId",
+      "value": ""
+    },
+    {
+      "key": "workerBId",
+      "value": ""
+    },
+    {
+      "key": "zidHappy",
+      "value": ""
+    },
+    {
+      "key": "zid360",
+      "value": ""
+    },
+    {
+      "key": "zidB",
+      "value": ""
+    },
+    {
+      "key": "zidRun",
+      "value": ""
+    },
+    {
+      "key": "notiz1000",
+      "value": ""
+    },
+    {
+      "key": "notiz1001",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0 — Setup (Testdaten)",
+      "item": [
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{adminEmail}}\", \"passwort\": \"{{adminPassword}}\", \"client\": \"web\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set('adminToken', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Baustelle anlegen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/baustellen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "baustellen"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"A4 Test-Baustelle\", \"adresse\": \"Teststraße 1\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('2xx', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });",
+                  "pm.collectionVariables.set('baustelleId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Worker A anlegen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/arbeiter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "arbeiter"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test Worker A\", \"email\": \"{{emailA}}\", \"passwort\": \"test1234\", \"rolle\": \"arbeiter\", \"wochenstunden\": \"40\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('2xx', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });",
+                  "pm.collectionVariables.set('workerAId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Worker B anlegen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/arbeiter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "arbeiter"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test Worker B\", \"email\": \"{{emailB}}\", \"passwort\": \"test1234\", \"rolle\": \"arbeiter\", \"wochenstunden\": \"40\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('2xx', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });",
+                  "pm.collectionVariables.set('workerBId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Login Worker A",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{emailA}}\", \"passwort\": \"test1234\", \"client\": \"web\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set('tokenA', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Login Worker B",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{emailB}}\", \"passwort\": \"test1234\", \"client\": \"web\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set('tokenB', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 — Start (POST /zeit/start)",
+      "item": [
+        {
+          "name": "TC-START-01 Start (Hauptpfad, Baustelle + Vergangenheit + Notiz) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"baustelle_id\": \"{{baustelleId}}\", \"start_zeit\": \"2026-06-20T08:00:00Z\", \"notiz\": \"Fliesen Bad\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test('end_zeit ist null (laufend)', function () { pm.expect(pm.response.json().end_zeit).to.eql(null); });",
+                  "pm.test('baustelle_id gesetzt', function () { pm.expect(pm.response.json().baustelle_id).to.eql(pm.collectionVariables.get('baustelleId')); });",
+                  "pm.collectionVariables.set('zidHappy', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-START-02 Start während laufender Buchung -> 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test('error.code == running_exists', function () { pm.expect(pm.response.json().error.code).to.eql('running_exists'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(reset) laufende Buchung A stoppen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('reset ok', function () { pm.expect(pm.response.code).to.be.oneOf([200,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-START-03 Start ohne baustelle_id (optional) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2026-06-20T09:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test('baustelle_id null', function () { pm.expect(pm.response.json().baustelle_id).to.eql(null); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(reset) laufende Buchung A stoppen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('reset ok', function () { pm.expect(pm.response.code).to.be.oneOf([200,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-START-04 Start mit unbekannter baustelle_id -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"baustelle_id\": \"019ee601-0000-7000-8000-000000000000\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == bad_request', function () { pm.expect(pm.response.json().error.code).to.eql('bad_request'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-START-05 Start start_zeit in der Zukunft -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2027-01-01T00:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == bad_request', function () { pm.expect(pm.response.json().error.code).to.eql('bad_request'); });",
+                  "pm.test('Meldung nennt Zukunft', function () { pm.expect(pm.response.json().error.message).to.include('Zukunft'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-START-06 Notiz = 1000 Zeichen (Grenze gueltig) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"notiz\": \"{{notiz1000}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(reset) laufende Buchung A stoppen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('reset ok', function () { pm.expect(pm.response.code).to.be.oneOf([200,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-START-07 Notiz = 1001 Zeichen (Grenze ungueltig) -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"notiz\": \"{{notiz1001}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == validation_error', function () { pm.expect(pm.response.json().error.code).to.eql('validation_error'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-START-08 start_zeit mit +02:00-Offset -> 201, als UTC gespeichert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2026-06-19T10:00:00+02:00\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test('als UTC (08:00:00Z) normalisiert', function () { pm.expect(pm.response.json().start_zeit).to.eql('2026-06-19T08:00:00Z'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(reset) laufende Buchung A stoppen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('reset ok', function () { pm.expect(pm.response.code).to.be.oneOf([200,409]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 — Stop (POST /zeit/stop)",
+      "item": [
+        {
+          "name": "(setup) Buchung A starten (10:00)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2026-06-20T10:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('start ok/bereits laufend', function () { pm.expect(pm.response.code).to.be.oneOf([201,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-STOP-01 Stop (Hauptpfad, end 12:30, Spanne 150) -> 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"end_zeit\": \"2026-06-20T12:30:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test('dauer_minuten == 150', function () { pm.expect(pm.response.json().dauer_minuten).to.eql(150); });",
+                  "pm.test('pause_minuten == 0 (Spanne < 6h)', function () { pm.expect(pm.response.json().pause_minuten).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-STOP-02 Stop ohne laufende Buchung -> 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test('error.code == no_running', function () { pm.expect(pm.response.json().error.code).to.eql('no_running'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Buchung A starten (10:00)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2026-06-20T10:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('start ok/bereits laufend', function () { pm.expect(pm.response.code).to.be.oneOf([201,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-STOP-03 Stop end_zeit == start_zeit -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"end_zeit\": \"2026-06-20T10:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == bad_request', function () { pm.expect(pm.response.json().error.code).to.eql('bad_request'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-STOP-04 Stop end_zeit < start_zeit -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"end_zeit\": \"2026-06-20T09:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == bad_request', function () { pm.expect(pm.response.json().error.code).to.eql('bad_request'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(reset) laufende Buchung A stoppen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('reset ok', function () { pm.expect(pm.response.code).to.be.oneOf([200,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Buchung A starten (08:00) fuer Spanne 360",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2026-06-20T08:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('start ok/bereits laufend', function () { pm.expect(pm.response.code).to.be.oneOf([201,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-STOP-05 Spanne genau 360 min (08:00-14:00) -> Pause 0, Dauer 360",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"end_zeit\": \"2026-06-20T14:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test('pause_minuten == 0', function () { pm.expect(pm.response.json().pause_minuten).to.eql(0); });",
+                  "pm.test('dauer_minuten == 360', function () { pm.expect(pm.response.json().dauer_minuten).to.eql(360); });",
+                  "pm.collectionVariables.set('zid360', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Buchung A starten (08:00) fuer Spanne 361",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2026-06-20T08:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('start ok/bereits laufend', function () { pm.expect(pm.response.code).to.be.oneOf([201,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-STOP-06 Spanne 361 min (08:00-14:01) -> gesetzl. Pause 30, Dauer 331",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"end_zeit\": \"2026-06-20T14:01:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test('pause_minuten == 30', function () { pm.expect(pm.response.json().pause_minuten).to.eql(30); });",
+                  "pm.test('dauer_minuten == 331', function () { pm.expect(pm.response.json().dauer_minuten).to.eql(331); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Buchung A starten (10:00) fuer Zukunfts-End-Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2026-06-20T10:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('start ok/bereits laufend', function () { pm.expect(pm.response.code).to.be.oneOf([201,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-STOP-07 [DEF-01] Stop mit end_zeit in der Zukunft (2030) -> ERWARTET 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"end_zeit\": \"2030-01-01T00:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('DEF-01: end_zeit in Zukunft muss 400 ergeben (analog start_zeit)', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 — Korrektur (PATCH /zeit/{id})",
+      "item": [
+        {
+          "name": "TC-PATCH-01 Eigene beendete Buchung: Notiz aendern -> 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/{{zid360}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "{{zid360}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"notiz\": \"korrigiert\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test('notiz uebernommen', function () { pm.expect(pm.response.json().notiz).to.eql('korrigiert'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-PATCH-02 pause == Spanne (360) -> 200, Dauer 0",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/{{zid360}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "{{zid360}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pause_minuten\": 360}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test('pause_minuten == 360', function () { pm.expect(pm.response.json().pause_minuten).to.eql(360); });",
+                  "pm.test('dauer_minuten == 0', function () { pm.expect(pm.response.json().dauer_minuten).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-PATCH-03 pause == Spanne+1 (361) -> 400",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/{{zid360}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "{{zid360}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pause_minuten\": 361}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == bad_request', function () { pm.expect(pm.response.json().error.code).to.eql('bad_request'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-PATCH-04 pause_minuten = -1 -> 400 (Validierung min 0)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/{{zid360}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "{{zid360}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pause_minuten\": -1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == validation_error', function () { pm.expect(pm.response.json().error.code).to.eql('validation_error'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Worker B: Buchung starten",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenB}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('start ok/bereits laufend', function () { pm.expect(pm.response.code).to.be.oneOf([201,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Worker B: laufende Buchung-ID holen",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenB}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/laufend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "laufend"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set('zidB', pm.response.json() ? pm.response.json().id : '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-PATCH-05 Fremde Buchung (Worker B) patchen -> 404",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/{{zidB}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "{{zidB}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"notiz\": \"hack\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test('error.code == not_found', function () { pm.expect(pm.response.json().error.code).to.eql('not_found'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-PATCH-06 Unbekannte {id} -> 404",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/019ee601-0000-7000-8000-000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "019ee601-0000-7000-8000-000000000000"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"notiz\": \"x\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test('error.code == not_found', function () { pm.expect(pm.response.json().error.code).to.eql('not_found'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-PATCH-07 Maliforme {id} -> 400",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/not-a-uuid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "not-a-uuid"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"notiz\": \"x\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == bad_request', function () { pm.expect(pm.response.json().error.code).to.eql('bad_request'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-PATCH-08 start_zeit nach bestehendem end_zeit -> 400 (korrekt behandelt)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/{{zid360}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "{{zid360}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2026-06-20T15:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == bad_request', function () { pm.expect(pm.response.json().error.code).to.eql('bad_request'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) Buchung A starten (laufend)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('start ok/bereits laufend', function () { pm.expect(pm.response.code).to.be.oneOf([201,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(setup) laufende Buchung-ID A holen",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/laufend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "laufend"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set('zidRun', pm.response.json() ? pm.response.json().id : '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-PATCH-09 [DEF-02] pause_minuten auf laufender Buchung -> ERWARTET 400",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/{{zidRun}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "{{zidRun}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pause_minuten\": 30}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('DEF-02: Pause auf laufender Buchung darf nicht akzeptiert werden (400)', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(reset) laufende Buchung A stoppen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('reset ok', function () { pm.expect(pm.response.code).to.be.oneOf([200,409]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4 — Laufend & Liste (GET)",
+      "item": [
+        {
+          "name": "(setup) Buchung A starten (13:00) fuer /laufend",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"start_zeit\": \"2026-06-20T13:00:00Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('start ok/bereits laufend', function () { pm.expect(pm.response.code).to.be.oneOf([201,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-LIST-01 /laufend bei laufender Buchung -> 200 mit Objekt",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/laufend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "laufend"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test('id vorhanden', function () { pm.expect(pm.response.json().id).to.be.a('string'); });",
+                  "pm.test('end_zeit null', function () { pm.expect(pm.response.json().end_zeit).to.eql(null); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "(reset) laufende Buchung A stoppen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "stop"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('reset ok', function () { pm.expect(pm.response.code).to.be.oneOf([200,409]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-LIST-02 /laufend ohne laufende Buchung -> 200, leer/null",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/laufend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "laufend"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test('Body leer oder null', function () { var t = pm.response.text().trim(); pm.expect(t === '' || t === 'null').to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-LIST-03 Eigene Liste mit gueltigem Zeitfilter -> 200 Array",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/?von=2026-06-01T00:00:00Z&bis=2026-07-01T00:00:00Z",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "von",
+                  "value": "2026-06-01T00:00:00Z"
+                },
+                {
+                  "key": "bis",
+                  "value": "2026-07-01T00:00:00Z"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test('Array', function () { pm.expect(Array.isArray(pm.response.json())).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-LIST-04 Eigene Liste mit ungueltigem von -> 400",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/?von=NOPE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "von",
+                  "value": "NOPE"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test('error.code == bad_request', function () { pm.expect(pm.response.json().error.code).to.eql('bad_request'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5 — Auth & Rolle",
+      "item": [
+        {
+          "name": "TC-AUTH-01 /zeit/start ohne Token -> 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/zeit/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zeit",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test('error.code == unauthorized', function () { pm.expect(pm.response.json().error.code).to.eql('unauthorized'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-AUTH-02 /admin/zeit mit Worker-Token -> 403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenA}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/zeit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "zeit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test('error.code == forbidden', function () { pm.expect(pm.response.json().error.code).to.eql('forbidden'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-AUTH-03 /admin/zeit mit Admin-Token (Gegenprobe) -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/zeit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "zeit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,291 @@
+newman
+
+Prekaj-Zeiterfassung — A4 Zeiterfassung start/stop
+
+❏ 0 — Setup (Testdaten)
+↳ Login Admin
+  POST http://localhost:8080/api/v1/auth/login [200 OK, 772B, 218ms]
+  ✓  Status 200
+
+↳ (setup) Baustelle anlegen
+  POST http://localhost:8080/api/v1/baustellen [201 Created, 410B, 3ms]
+  ✓  2xx
+
+↳ (setup) Worker A anlegen
+  POST http://localhost:8080/api/v1/arbeiter [201 Created, 486B, 203ms]
+  ✓  2xx
+
+↳ (setup) Worker B anlegen
+  POST http://localhost:8080/api/v1/arbeiter [201 Created, 486B, 201ms]
+  ✓  2xx
+
+↳ (setup) Login Worker A
+  POST http://localhost:8080/api/v1/auth/login [200 OK, 794B, 201ms]
+  ✓  Status 200
+
+↳ (setup) Login Worker B
+  POST http://localhost:8080/api/v1/auth/login [200 OK, 794B, 201ms]
+  ✓  Status 200
+
+❏ 1 — Start (POST /zeit/start)
+↳ TC-START-01 Start (Hauptpfad, Baustelle + Vergangenheit + Notiz) -> 201
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 564B, 3ms]
+  ✓  Status 201
+  ✓  end_zeit ist null (laufend)
+  ✓  baustelle_id gesetzt
+
+↳ TC-START-02 Start während laufender Buchung -> 409
+  POST http://localhost:8080/api/v1/zeit/start [409 Conflict, 310B, 2ms]
+  ✓  Status 409
+  ✓  error.code == running_exists
+
+↳ (reset) laufende Buchung A stoppen
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 577B, 4ms]
+  ✓  reset ok
+
+↳ TC-START-03 Start ohne baustelle_id (optional) -> 201
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 519B, 3ms]
+  ✓  Status 201
+  ✓  baustelle_id null
+
+↳ (reset) laufende Buchung A stoppen
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 532B, 2ms]
+  ✓  reset ok
+
+↳ TC-START-04 Start mit unbekannter baustelle_id -> 400
+  POST http://localhost:8080/api/v1/zeit/start [400 Bad Request, 296B, 2ms]
+  ✓  Status 400
+  ✓  error.code == bad_request
+
+↳ TC-START-05 Start start_zeit in der Zukunft -> 400
+  POST http://localhost:8080/api/v1/zeit/start [400 Bad Request, 319B, 1ms]
+  ✓  Status 400
+  ✓  error.code == bad_request
+  ✓  Meldung nennt Zukunft
+
+↳ TC-START-06 Notiz = 1000 Zeichen (Grenze gueltig) -> 201
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 1.52kB, 5ms]
+  ✓  Status 201
+
+↳ (reset) laufende Buchung A stoppen
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 1.53kB, 2ms]
+  ✓  reset ok
+
+↳ TC-START-07 Notiz = 1001 Zeichen (Grenze ungueltig) -> 400
+  POST http://localhost:8080/api/v1/zeit/start [400 Bad Request, 328B, 1ms]
+  ✓  Status 400
+  ✓  error.code == validation_error
+
+↳ TC-START-08 start_zeit mit +02:00-Offset -> 201, als UTC gespeichert
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 519B, 2ms]
+  ✓  Status 201
+  ✓  als UTC (08:00:00Z) normalisiert
+
+↳ (reset) laufende Buchung A stoppen
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 533B, 2ms]
+  ✓  reset ok
+
+❏ 2 — Stop (POST /zeit/stop)
+↳ (setup) Buchung A starten (10:00)
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 519B, 3ms]
+  ✓  start ok/bereits laufend
+
+↳ TC-STOP-01 Stop (Hauptpfad, end 12:30, Spanne 150) -> 200
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 531B, 3ms]
+  ✓  Status 200
+  ✓  dauer_minuten == 150
+  ✓  pause_minuten == 0 (Spanne < 6h)
+
+↳ TC-STOP-02 Stop ohne laufende Buchung -> 409
+  POST http://localhost:8080/api/v1/zeit/stop [409 Conflict, 293B, 2ms]
+  ✓  Status 409
+  ✓  error.code == no_running
+
+↳ (setup) Buchung A starten (10:00)
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 518B, 3ms]
+  ✓  start ok/bereits laufend
+
+↳ TC-STOP-03 Stop end_zeit == start_zeit -> 400
+  POST http://localhost:8080/api/v1/zeit/stop [400 Bad Request, 311B, 2ms]
+  ✓  Status 400
+  ✓  error.code == bad_request
+
+↳ TC-STOP-04 Stop end_zeit < start_zeit -> 400
+  POST http://localhost:8080/api/v1/zeit/stop [400 Bad Request, 311B, 2ms]
+  ✓  Status 400
+  ✓  error.code == bad_request
+
+↳ (reset) laufende Buchung A stoppen
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 531B, 3ms]
+  ✓  reset ok
+
+↳ (setup) Buchung A starten (08:00) fuer Spanne 360
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 518B, 2ms]
+  ✓  start ok/bereits laufend
+
+↳ TC-STOP-05 Spanne genau 360 min (08:00-14:00) -> Pause 0, Dauer 360
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 530B, 3ms]
+  ✓  Status 200
+  ✓  pause_minuten == 0
+  ✓  dauer_minuten == 360
+
+↳ (setup) Buchung A starten (08:00) fuer Spanne 361
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 518B, 2ms]
+  ✓  start ok/bereits laufend
+
+↳ TC-STOP-06 Spanne 361 min (08:00-14:01) -> gesetzl. Pause 30, Dauer 331
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 531B, 4ms]
+  ✓  Status 200
+  ✓  pause_minuten == 30
+  ✓  dauer_minuten == 331
+
+↳ (setup) Buchung A starten (10:00) fuer Zukunfts-End-Test
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 518B, 3ms]
+  ✓  start ok/bereits laufend
+
+↳ TC-STOP-07 [DEF-01] Stop mit end_zeit in der Zukunft (2030) -> ERWARTET 400
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 535B, 3ms]
+  1. DEF-01: end_zeit in Zukunft muss 400 ergeben (analog start_zeit)
+
+❏ 3 — Korrektur (PATCH /zeit/{id})
+↳ TC-PATCH-01 Eigene beendete Buchung: Notiz aendern -> 200
+  PATCH http://localhost:8080/api/v1/zeit/019ee60b-6321-7b33-b807-efcf6554809e [200 OK, 540B, 4ms]
+  ✓  Status 200
+  ✓  notiz uebernommen
+
+↳ TC-PATCH-02 pause == Spanne (360) -> 200, Dauer 0
+  PATCH http://localhost:8080/api/v1/zeit/019ee60b-6321-7b33-b807-efcf6554809e [200 OK, 540B, 4ms]
+  ✓  Status 200
+  ✓  pause_minuten == 360
+  ✓  dauer_minuten == 0
+
+↳ TC-PATCH-03 pause == Spanne+1 (361) -> 400
+  PATCH http://localhost:8080/api/v1/zeit/019ee60b-6321-7b33-b807-efcf6554809e [400 Bad Request, 311B, 3ms]
+  ✓  Status 400
+  ✓  error.code == bad_request
+
+↳ TC-PATCH-04 pause_minuten = -1 -> 400 (Validierung min 0)
+  PATCH http://localhost:8080/api/v1/zeit/019ee60b-6321-7b33-b807-efcf6554809e [400 Bad Request, 333B, 1ms]
+  ✓  Status 400
+  ✓  error.code == validation_error
+
+↳ (setup) Worker B: Buchung starten
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 518B, 3ms]
+  ✓  start ok/bereits laufend
+
+↳ (setup) Worker B: laufende Buchung-ID holen
+  GET http://localhost:8080/api/v1/zeit/laufend [200 OK, 513B, 3ms]
+  ✓  200
+
+↳ TC-PATCH-05 Fremde Buchung (Worker B) patchen -> 404
+  PATCH http://localhost:8080/api/v1/zeit/019ee60b-63bb-7645-a75e-c65625782ec9 [404 Not Found, 297B, 2ms]
+  ✓  Status 404
+  ✓  error.code == not_found
+
+↳ TC-PATCH-06 Unbekannte {id} -> 404
+  PATCH http://localhost:8080/api/v1/zeit/019ee601-0000-7000-8000-000000000000 [404 Not Found, 297B, 3ms]
+  ✓  Status 404
+  ✓  error.code == not_found
+
+↳ TC-PATCH-07 Maliforme {id} -> 400
+  PATCH http://localhost:8080/api/v1/zeit/not-a-uuid [400 Bad Request, 288B, 1ms]
+  ✓  Status 400
+  ✓  error.code == bad_request
+
+↳ TC-PATCH-08 start_zeit nach bestehendem end_zeit -> 400 (korrekt behandelt)
+  PATCH http://localhost:8080/api/v1/zeit/019ee60b-6321-7b33-b807-efcf6554809e [400 Bad Request, 311B, 3ms]
+  ✓  Status 400
+  ✓  error.code == bad_request
+
+↳ (setup) Buchung A starten (laufend)
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 518B, 4ms]
+  ✓  start ok/bereits laufend
+
+↳ (setup) laufende Buchung-ID A holen
+  GET http://localhost:8080/api/v1/zeit/laufend [200 OK, 513B, 2ms]
+  ✓  200
+
+↳ TC-PATCH-09 [DEF-02] pause_minuten auf laufender Buchung -> ERWARTET 400
+  PATCH http://localhost:8080/api/v1/zeit/019ee60b-6413-71e8-85ec-5d223d75c26a [200 OK, 514B, 5ms]
+  2. DEF-02: Pause auf laufender Buchung darf nicht akzeptiert werden (400)
+
+↳ (reset) laufende Buchung A stoppen
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 528B, 4ms]
+  ✓  reset ok
+
+❏ 4 — Laufend & Liste (GET)
+↳ (setup) Buchung A starten (13:00) fuer /laufend
+  POST http://localhost:8080/api/v1/zeit/start [201 Created, 518B, 4ms]
+  ✓  start ok/bereits laufend
+
+↳ TC-LIST-01 /laufend bei laufender Buchung -> 200 mit Objekt
+  GET http://localhost:8080/api/v1/zeit/laufend [200 OK, 513B, 3ms]
+  ✓  Status 200
+  ✓  id vorhanden
+  ✓  end_zeit null
+
+↳ (reset) laufende Buchung A stoppen
+  POST http://localhost:8080/api/v1/zeit/stop [200 OK, 530B, 4ms]
+  ✓  reset ok
+
+↳ TC-LIST-02 /laufend ohne laufende Buchung -> 200, leer/null
+  GET http://localhost:8080/api/v1/zeit/laufend [200 OK, 218B, 2ms]
+  ✓  Status 200
+  ✓  Body leer oder null
+
+↳ TC-LIST-03 Eigene Liste mit gueltigem Zeitfilter -> 200 Array
+  GET http://localhost:8080/api/v1/zeit/?von=2026-06-01T00:00:00Z&bis=2026-07-01T00:00:00Z [200 OK, 4.7kB, 3ms]
+  ✓  Status 200
+  ✓  Array
+
+↳ TC-LIST-04 Eigene Liste mit ungueltigem von -> 400
+  GET http://localhost:8080/api/v1/zeit/?von=NOPE [400 Bad Request, 310B, 1ms]
+  ✓  Status 400
+  ✓  error.code == bad_request
+
+❏ 5 — Auth & Rolle
+↳ TC-AUTH-01 /zeit/start ohne Token -> 401
+  POST http://localhost:8080/api/v1/zeit/start [401 Unauthorized, 297B, 1ms]
+  ✓  Status 401
+  ✓  error.code == unauthorized
+
+↳ TC-AUTH-02 /admin/zeit mit Worker-Token -> 403
+  GET http://localhost:8080/api/v1/admin/zeit [403 Forbidden, 295B, 1ms]
+  ✓  Status 403
+  ✓  error.code == forbidden
+
+↳ TC-AUTH-03 /admin/zeit mit Admin-Token (Gegenprobe) -> 200
+  GET http://localhost:8080/api/v1/admin/zeit [200 OK, 9.86kB, 4ms]
+  ✓  Status 200
+
+┌─────────────────────────┬───────────────────┬──────────────────┐
+│                         │          executed │           failed │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              iterations │                 1 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│                requests │                54 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│            test-scripts │                54 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│      prerequest-scripts │                54 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              assertions │                88 │                2 │
+├─────────────────────────┴───────────────────┴──────────────────┤
+│ total run duration: 1793ms                                     │
+├────────────────────────────────────────────────────────────────┤
+│ total data received: 28.13kB (approx)                          │
+├────────────────────────────────────────────────────────────────┤
+│ average response time: 21ms [min: 1ms, max: 218ms, s.d.: 58ms] │
+└────────────────────────────────────────────────────────────────┘
+
+  #  failure         detail                                                                                                               
+                                                                                                                                          
+ 1.  AssertionError  DEF-01: end_zeit in Zukunft muss 400 ergeben (analog start_zeit)                                                     
+                     expected response to have status code 400 but got 200                                                                
+                     at assertion:0 in test-script                                                                                        
+                     inside "2 — Stop (POST /zeit/stop) / TC-STOP-07 [DEF-01] Stop mit end_zeit in der Zukunft (2030) -> ERWARTET 400"    
+                                                                                                                                          
+ 2.  AssertionError  DEF-02: Pause auf laufender Buchung darf nicht akzeptiert werden (400)                                               
+                     expected response to have status code 400 but got 200                                                                
+                     at assertion:0 in test-script                                                                                        
+                     inside "3 — Korrektur (PATCH /zeit/{id}) / TC-PATCH-09 [DEF-02] pause_minuten auf laufender Buchung -> ERWARTET 400" 

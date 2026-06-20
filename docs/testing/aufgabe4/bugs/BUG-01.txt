@@ -1,0 +1,19 @@
+############################################################
+# BUG-01  end_zeit in der Zukunft wird akzeptiert
+# Erwartet: 400  |  Tatsaechlich: 200
+############################################################
+
+>>> (Variante A: STOP) POST /zeit/start  {"start_zeit":"2026-06-20T10:00:00Z"}
+{"id":"019ee60d-4f91-718a-aad6-13921d3244db","start_zeit":"2026-06-20T10:00:00Z","end_zeit":null}
+
+>>> POST /zeit/stop  {"end_zeit":"2030-01-01T00:00:00Z"}   (~3,5 Jahre in der Zukunft)
+    HTTP-Status: 200
+    Antwort: {"end_zeit":"2030-01-01T00:00:00Z","dauer_minuten":1858410}
+    => HTTP 200 statt 400; dauer_minuten ~ 1858410 (=1290 Tage) => FEHLER
+
+>>> (Variante B: PATCH) POST /zeit/start  {"start_zeit":"2026-06-20T11:00:00Z"}
+    laufende Buchung id=019ee60d-4fa8-702a-8a81-28331d6648ec
+>>> PATCH /zeit/019ee60d-4fa8-702a-8a81-28331d6648ec  {"end_zeit":"2030-01-01T00:00:00Z"}
+    HTTP-Status: 200
+    Antwort: {"end_zeit":"2030-01-01T00:00:00Z","dauer_minuten":1858350}
+    => auch via PATCH akzeptiert (HTTP 200) => FEHLER

@@ -1,0 +1,17 @@
+############################################################
+# BUG-02  Pause auf laufender Buchung wird akzeptiert
+# Erwartet: 400  |  Tatsaechlich: 200 (Wert beim Stop verworfen)
+############################################################
+
+>>> POST /zeit/start  {}  (laufende Buchung, end_zeit=null)
+    laufende Buchung id=019ee60d-5237-741a-aa70-d1ee74df8f7c
+
+>>> PATCH /zeit/019ee60d-5237-741a-aa70-d1ee74df8f7c  {"pause_minuten":30}   (Buchung laeuft noch)
+    HTTP-Status: 200
+    Antwort: {"end_zeit":null,"pause_minuten":30,"dauer_minuten":null}
+    => HTTP 200, pause_minuten=30 auf laufender Buchung gesetzt (erwartet 400) => FEHLER
+
+>>> POST /zeit/stop {"end_zeit":"...+1h"}  -> Pause wird neu berechnet/verworfen
+    HTTP-Status: 200
+    Antwort: {"pause_minuten":0,"dauer_minuten":59}
+    => zuvor gesetzte Pause=30 ist beim Stop verschwunden (still verworfen)
